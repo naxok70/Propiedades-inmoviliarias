@@ -1,9 +1,6 @@
 backend:
-  name: github
-  repo: naxok70/Propiedades-inmoviliarias
+  name: git-gateway
   branch: main
-
-local_backend: true
 
 media_folder: "images"
 public_folder: "images"
