@@ -2,8 +2,8 @@ backend:
   name: github
   repo: naxok70/Propiedades-inmoviliarias
   branch: main
-  client_id: "Ov231ih8EehRpAhgP97X"
-  base_url: https://backapi.netlify.com
+
+local_backend: true
 
 media_folder: "images"
 public_folder: "images"
