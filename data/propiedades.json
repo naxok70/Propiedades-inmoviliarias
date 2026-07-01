@@ -1,56 +1,47 @@
 [
-    {
-        "id": 1,
-        "titulo": "Casa Moderna en Providencia",
-        "ubicacion": "Providencia, Santiago",
-        "precio": 250000000,
-        "piezas": 3,
-        "banos": 2,
-        "imagen": "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop"
-    },
-    {
-        "id": 2,
-        "titulo": "Departamento con Vista al Mar",
-        "ubicacion": "Viña del Mar, V Región",
-        "precio": 180000000,
-        "piezas": 2,
-        "banos": 1,
-        "imagen": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop"
-    },
-    {
-        "id": 3,
-        "titulo": "Casa Familiar con Jardín",
-        "ubicacion": "Las Condes, Santiago",
-        "precio": 450000000,
-        "piezas": 4,
-        "banos": 3,
-        "imagen": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop"
-    },
-    {
-        "id": 4,
-        "titulo": "Loft Estudio en Centro",
-        "ubicacion": "Santiago Centro",
-        "precio": 120000000,
-        "piezas": 1,
-        "banos": 1,
-        "imagen": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop"
-    },
-    {
-        "id": 5,
-        "titulo": "Casa de Campo",
-        "ubicacion": "Curacaví, Región Metropolitana",
-        "precio": 320000000,
-        "piezas": 3,
-        "banos": 2,
-        "imagen": "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&h=600&fit=crop"
-    },
-    {
-        "id": 6,
-        "titulo": "Departamento Premium",
-        "ubicacion": "Vitacura, Santiago",
-        "precio": 380000000,
-        "piezas": 3,
-        "banos": 2,
-        "imagen": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop"
-    }
+  {
+    "id": 2,
+    "titulo": "Departamento con Vista al Mar",
+    "ubicacion": "Viña del Mar, V Región",
+    "precio": 180000000,
+    "piezas": 2,
+    "banos": 1,
+    "imagen": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop"
+  },
+  {
+    "id": 3,
+    "titulo": "Casa Familiar con Jardín",
+    "ubicacion": "Las Condes, Santiago",
+    "precio": 450000000,
+    "piezas": 4,
+    "banos": 3,
+    "imagen": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop"
+  },
+  {
+    "id": 4,
+    "titulo": "Loft Estudio en Centro",
+    "ubicacion": "Santiago Centro",
+    "precio": 120000000,
+    "piezas": 1,
+    "banos": 1,
+    "imagen": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop"
+  },
+  {
+    "id": 5,
+    "titulo": "Casa de Campo",
+    "ubicacion": "Curacaví, Región Metropolitana",
+    "precio": 320000000,
+    "piezas": 3,
+    "banos": 2,
+    "imagen": "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&h=600&fit=crop"
+  },
+  {
+    "id": 6,
+    "titulo": "Departamento Premium",
+    "ubicacion": "Vitacura, Santiago",
+    "precio": 380000000,
+    "piezas": 3,
+    "banos": 2,
+    "imagen": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop"
+  }
 ]
