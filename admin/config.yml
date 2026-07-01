@@ -12,16 +12,19 @@ collections:
     label: "Propiedades"
     label_singular: "Propiedad"
     description: "Catálogo de propiedades en venta"
-    file: "data/propiedades.json"
-    fields:
-      - label: "Lista de Propiedades"
+    files:
+      - label: "Propiedades"
         name: "propiedades"
-        widget: "list"
+        file: "data/propiedades.json"
         fields:
-          - { label: "ID Único", name: "id", widget: "string", required: true }
-          - { label: "Título de la Propiedad", name: "titulo", widget: "string", required: true }
-          - { label: "Ubicación / Dirección", name: "ubicacion", widget: "string", required: true }
-          - { label: "Precio ($)", name: "precio", widget: "number", value_type: "int", required: true, default: 0 }
-          - { label: "Cantidad de Piezas", name: "piezas", widget: "number", value_type: "int", required: true, default: 1 }
-          - { label: "Cantidad de Baños", name: "banos", widget: "number", value_type: "int", required: true, default: 1 }
-          - { label: "Foto de la Propiedad", name: "imagen", widget: "image", required: true }
+          - label: "Lista de Propiedades"
+            name: "propiedades"
+            widget: "list"
+            fields:
+              - { label: "ID Único", name: "id", widget: "string", required: true }
+              - { label: "Título de la Propiedad", name: "titulo", widget: "string", required: true }
+              - { label: "Ubicación / Dirección", name: "ubicacion", widget: "string", required: true }
+              - { label: "Precio ($)", name: "precio", widget: "number", value_type: "int", required: true, default: 0 }
+              - { label: "Cantidad de Piezas", name: "piezas", widget: "number", value_type: "int", required: true, default: 1 }
+              - { label: "Cantidad de Baños", name: "banos", widget: "number", value_type: "int", required: true, default: 1 }
+              - { label: "Foto de la Propiedad", name: "imagen", widget: "image", required: true }
