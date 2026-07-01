@@ -2,6 +2,7 @@ backend:
   name: github
   repo: naxok70/Propiedades-inmobiliarias
   branch: main
+  client_id: "Ov231ih8EehRpAhgP97X"
 
 media_folder: "assets/propiedades"
 public_folder: "/assets/propiedades"
