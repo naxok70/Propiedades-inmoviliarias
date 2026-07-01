@@ -1,14 +1,5 @@
 [
   {
-    "id": 3,
-    "titulo": "Casa Familiar con Jardín",
-    "ubicacion": "Las Condes, Santiago",
-    "precio": 450000000,
-    "piezas": 4,
-    "banos": 3,
-    "imagen": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop"
-  },
-  {
     "id": 4,
     "titulo": "Loft Estudio en Centro",
     "ubicacion": "Santiago Centro",
