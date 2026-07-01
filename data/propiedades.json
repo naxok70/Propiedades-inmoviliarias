@@ -1,13 +1,5 @@
 [
   {
-    "titulo": "Casa Moderna en Providencia",
-    "precio": "250000000",
-    "ubicacion": "Providencia, Santiago",
-    "piezas": 3,
-    "banos": 2,
-    "imagen": "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop"
-  },
-  {
     "id": 3,
     "titulo": "Casa Familiar con Jardín",
     "ubicacion": "Las Condes, Santiago",
