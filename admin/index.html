@@ -6,7 +6,12 @@
     <title>Content Manager</title>
   </head>
   <body>
-    <!-- El script al final evita el error de appendChild de null -->
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var script = document.createElement('script');
+        script.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
+        document.body.appendChild(script);
+      });
+    </script>
   </body>
 </html>
