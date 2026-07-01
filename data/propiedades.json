@@ -1,12 +1,11 @@
 [
   {
-    "id": 2,
-    "titulo": "Departamento con Vista al Mar",
-    "ubicacion": "Viña del Mar, V Región",
-    "precio": 180000000,
-    "piezas": 2,
-    "banos": 1,
-    "imagen": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop"
+    "titulo": "Casa Moderna en Providencia",
+    "precio": "250000000",
+    "ubicacion": "Providencia, Santiago",
+    "piezas": 3,
+    "banos": 2,
+    "imagen": "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop"
   },
   {
     "id": 3,
