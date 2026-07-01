@@ -1,18 +1,194 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Content Manager</title>
-  </head>
-  <body>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        var script = document.createElement('script');
-        script.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
-        document.body.appendChild(script);
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Administración - Corredora</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+  <style>
+    body { max-width: 800px; margin: 20px auto; padding: 0 20px; font-family: system-ui, sans-serif; }
+    .propiedad-card { border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .acciones { display: flex; gap: 10px; }
+    #login-section { text-align: center; margin-top: 100px; max-width: 400px; margin-left: auto; margin-right: auto; padding: 30px; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9; }
+    #admin-panel { display: none; }
+    .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    .btn-edit { background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div id="login-section">
+    <h2>🔒 Acceso al Panel Inmobiliario (Modo Local)</h2>
+    <p>Escribe cualquier cosa para ingresar y probar el diseño del panel.</p>
+    <input type="password" id="access-key" placeholder="Escribe cualquier clave aquí...">
+    <button onclick="verificarAcceso()">Ingresar al Panel</button>
+  </div>
+
+  <div id="admin-panel">
+    <button onclick="cerrarSesion()" style="float: right; background: #555;">Cerrar Sesión</button>
+    <h1>🏡 Panel de Control de Propiedades</h1>
+    <p>Desde aquí puedes añadir nuevas propiedades, editar los datos existentes o eliminarlas. Los cambios se guardan localmente en tu navegador.</p>
+    
+    <hr style="clear: both; margin-top: 20px;">
+
+    <h2 id="form-title">➕ Añadir Nueva Propiedad</h2>
+    <form id="propiedad-form">
+      <input type="hidden" id="index-propiedad" value="">
+      
+      <label><b>Título o Nombre de la Propiedad:</b></label>
+      <input type="text" id="titulo" required placeholder="Ej: Hermosa Casa en Providencia">
+      
+      <label><b>Precio de Venta/Arriendo:</b></label>
+      <input type="text" id="precio" required placeholder="Ej: $250.000.000">
+      
+      <label><b>Ubicación / Dirección General:</b></label>
+      <input type="text" id="ubicacion" required placeholder="Ej: Providencia, Santiago">
+      
+      <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+          <label><b>N° de Dormitorios:</b></label>
+          <input type="number" id="piezas" required min="0" value="0">
+        </div>
+        <div style="flex: 1;">
+          <label><b>N° de Baños:</b></label>
+          <input type="number" id="banos" required min="0" value="0">
+        </div>
+      </div>
+      
+      <label><b>Ruta de la Foto (Imagen):</b></label>
+      <input type="text" id="imagen" required placeholder="Ej: images/casa1.jpg">
+
+      <button type="submit" id="btn-guardar" style="background: #28a745; color:white; width: 100%; font-size: 1.1em; cursor: pointer;">💾 Guardar Cambios Localmente</button>
+      <button type="button" id="btn-cancelar" style="display:none; background:#6c757d; width: 100%; margin-top: 5px;">Cancelar Edición</button>
+    </form>
+
+    <hr style="margin: 40px 0;">
+
+    <h2>📋 Propiedades Publicadas Actualmente (Vista Local)</h2>
+    <div id="lista-propiedades">Cargando base de datos local...</div>
+  </div>
+
+  <script>
+    let propiedades = [];
+
+    // 1. CARGAR DATOS LOCALES DESDE EL NAVEGADOR
+    function verificarAcceso() {
+      // Ocultar login y mostrar el panel
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      
+      // Buscar si ya guardamos datos antes en el navegador, si no, crear una por defecto
+      const datosLocales = localStorage.getItem('propiedades_local');
+      if (datosLocales) {
+        propiedades = JSON.parse(datosLocales);
+      } else {
+        propiedades = [
+          {
+            titulo: "Casa de Prueba Local en Vitacura",
+            precio: "UF 12.500",
+            ubicacion: "Vitacura, Santiago",
+            piezas: 4,
+            banos: 3,
+            imagen: "images/casa1.jpg"
+          }
+        ];
+        localStorage.setItem('propiedades_local', JSON.stringify(propiedades));
+      }
+      renderizarPropiedades();
+    }
+
+    // 2. DIBUJAR LAS TARJETAS EN PANTALLA
+    function renderizarPropiedades() {
+      const contenedor = document.getElementById('lista-propiedades');
+      if (propiedades.length === 0) {
+        contenedor.innerHTML = "<p>No hay propiedades guardadas en la memoria local.</p>";
+        return;
+      }
+      
+      contenedor.innerHTML = "";
+      propiedades.forEach((p, idx) => {
+        contenedor.innerHTML += `
+          <div class="propiedad-card">
+            <div>
+              <strong style="font-size: 1.1em; color: #111;">${p.titulo}</strong><br>
+              <span style="color: #28a745; font-weight: bold;">${p.precio}</span><br>
+              <small style="color: #666;">📍 ${p.ubicacion} | 🛏️ ${p.piezas} piezas | 🚿 ${p.banos} baños</small>
+            </div>
+            <div class="acciones">
+              <button onclick="prepararEditar(${idx})" class="btn-edit">✏️ Editar</button>
+              <button onclick="eliminarPropiedad(${idx})" class="btn-delete">❌ Borrar</button>
+            </div>
+          </div>
+        `;
       });
-    </script>
-  </body>
+    }
+
+    // 3. CAPTURAR EL FORMULARIO (AGREGAR O EDITAR)
+    document.getElementById('propiedad-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const idx = document.getElementById('index-propiedad').value;
+      
+      const nuevaPropiedad = {
+        titulo: document.getElementById('titulo').value,
+        precio: document.getElementById('precio').value,
+        ubicacion: document.getElementById('ubicacion').value,
+        piezas: parseInt(document.getElementById('piezas').value),
+        banos: parseInt(document.getElementById('banos').value),
+        imagen: document.getElementById('imagen').value
+      };
+
+      if (idx === "") {
+        propiedades.push(nuevaPropiedad); // Añadir nuevo item
+      } else {
+        propiedades[idx] = nuevaPropiedad; // Guardar edición
+      }
+
+      // Guardar stringificado en el localStorage del navegador
+      localStorage.setItem('propiedades_local', JSON.stringify(propiedades, null, 2));
+      alert("¡Súper! Cambios guardados temporalmente en tu navegador.");
+      
+      renderizarPropiedades();
+      resetFormulario();
+    });
+
+    // 4. ELIMINAR PROPIEDAD
+    function eliminarPropiedad(idx) {
+      if (confirm(`¿Estás seguro de eliminar "${propiedades[idx].titulo}"?`)) {
+        propiedades.splice(idx, 1);
+        localStorage.setItem('propiedades_local', JSON.stringify(propiedades, null, 2));
+        renderizarPropiedades();
+      }
+    }
+
+    // 5. PASAR DATOS AL FORMULARIO PARA EDITAR
+    function prepararEditar(idx) {
+      const p = propiedades[idx];
+      document.getElementById('index-propiedad').value = idx;
+      document.getElementById('titulo').value = p.titulo;
+      document.getElementById('precio').value = p.precio;
+      document.getElementById('ubicacion').value = p.ubicacion;
+      document.getElementById('piezas').value = p.piezas;
+      document.getElementById('banos').value = p.banos;
+      document.getElementById('imagen').value = p.imagen;
+      
+      document.getElementById('form-title').innerText = "✏️ Editando: " + p.titulo;
+      document.getElementById('btn-guardar').innerText = "💾 Actualizar de forma Local";
+      document.getElementById('btn-cancelar').style.display = "inline-block";
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetFormulario() {
+      document.getElementById('propiedad-form').reset();
+      document.getElementById('index-propiedad').value = "";
+      document.getElementById('form-title').innerText = "➕ Añadir Nueva Propiedad";
+      document.getElementById('btn-guardar').innerText = "💾 Guardar Cambios Localmente";
+      document.getElementById('btn-cancelar').style.display = "none";
+    }
+
+    function cerrarSesion() {
+      document.getElementById('admin-panel').style.display = 'none';
+      document.getElementById('login-section').style.display = 'block';
+    }
+  </script>
+</body>
 </html>
