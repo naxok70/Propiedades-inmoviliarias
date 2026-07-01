@@ -1,30 +1,27 @@
 backend:
   name: github
-  repo: naxok70/Propiedades-inmobiliarias
+  repo: naxok70/Propiedades-inmoviliarias
   branch: main
   client_id: "Ov231ih8EehRpAhgP97X"
 
-media_folder: "assets/propiedades"
-public_folder: "/assets/propiedades"
+media_folder: "images"
+public_folder: "images"
 
 collections:
-  - name: "propiedades"
+  - name: "configuracion"
     label: "Propiedades"
-    label_singular: "Propiedad"
-    description: "Catálogo de propiedades en venta"
+    delete: false
+    editor:
+      preview: false
     files:
-      - label: "Propiedades"
-        name: "propiedades"
+      - name: "lista_propiedades"
+        label: "Lista de Propiedades"
         file: "data/propiedades.json"
+        format: "json"
         fields:
-          - label: "Lista de Propiedades"
-            name: "propiedades"
-            widget: "list"
-            fields:
-              - { label: "ID Único", name: "id", widget: "string", required: true }
-              - { label: "Título de la Propiedad", name: "titulo", widget: "string", required: true }
-              - { label: "Ubicación / Dirección", name: "ubicacion", widget: "string", required: true }
-              - { label: "Precio ($)", name: "precio", widget: "number", value_type: "int", required: true, default: 0 }
-              - { label: "Cantidad de Piezas", name: "piezas", widget: "number", value_type: "int", required: true, default: 1 }
-              - { label: "Cantidad de Baños", name: "banos", widget: "number", value_type: "int", required: true, default: 1 }
-              - { label: "Foto de la Propiedad", name: "imagen", widget: "image", required: true }
+          - { label: "Título", name: "titulo", widget: "string" }
+          - { label: "Precio", name: "precio", widget: "string" }
+          - { label: "Ubicación", name: "ubicacion", widget: "string" }
+          - { label: "Piezas", name: "piezas", widget: "number" }
+          - { label: "Baños", name: "banos", widget: "number" }
+          - { label: "Imagen", name: "imagen", widget: "image" }
