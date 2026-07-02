@@ -18,15 +18,28 @@ function renderizarPropiedades() {
     contenedor.innerHTML = '';
     
     // Recorrer el array de propiedades y crear las tarjetas
-    propiedades.forEach(propiedad => {
+    propiedades.forEach((propiedad, idx) => {
         const col = document.createElement('div');
         col.className = 'col-12 col-sm-6 col-md-4 col-lg-4';
         
         const card = document.createElement('div');
         card.className = 'card property-card';
         
+        // Obtener imágenes: usar arreglo imagenes o fallback a imagen individual
+        const imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : [propiedad.imagen || 'images/casa1.jpg'];
+        const primeraImagen = imagenes[0];
+        
+        const cardId = `propiedad-${idx}`;
+        const imgId = `img-${idx}`;
+        const counterId = `counter-${idx}`;
+        
         card.innerHTML = `
-            <img src="${propiedad.imagen}" class="card-img-top" alt="${propiedad.titulo}" loading="lazy">
+            <div class="image-carousel">
+                <button class="carousel-nav carousel-prev" onclick="cambiarImagen('${cardId}', -1)">‹</button>
+                <img id="${imgId}" src="${primeraImagen}" alt="${propiedad.titulo}" loading="lazy" data-current-index="0">
+                <button class="carousel-nav carousel-next" onclick="cambiarImagen('${cardId}', 1)">›</button>
+                <div id="${counterId}" class="image-counter">1/${imagenes.length}</div>
+            </div>
             <div class="card-body">
                 <h5 class="card-title">${propiedad.titulo}</h5>
                 <p class="price">${formatearPrecio(propiedad.precio)}</p>
@@ -51,34 +64,81 @@ function renderizarPropiedades() {
             </div>
         `;
         
+        // Guardar las imágenes en el elemento para usarlas en el carrusel
+        card.dataset.imagenes = JSON.stringify(imagenes);
+        
         col.appendChild(card);
         contenedor.appendChild(col);
     });
 }
 
-// Función para cargar propiedades desde el archivo JSON
-async function cargarPropiedades() {
-    try {
-        const respuesta = await fetch('data/propiedades.json');
-        if (!respuesta.ok) {
-            throw new Error('Error al cargar el archivo JSON');
+// Función global para cambiar imágenes en el carrusel
+function cambiarImagen(cardId, direction) {
+    const idx = parseInt(cardId.replace('propiedad-', ''));
+    const imgElement = document.getElementById(`img-${idx}`);
+    const counterElement = document.getElementById(`counter-${idx}`);
+    
+    // Obtener las imágenes del array global o localStorage
+    let imagenes;
+    const datosLocales = localStorage.getItem('propiedades_local');
+    
+    if (datosLocales) {
+        const propiedades = JSON.parse(datosLocales);
+        const propiedad = propiedades[idx];
+        if (propiedad) {
+            imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : [propiedad.imagen || 'images/casa1.jpg'];
         }
-        propiedades = await respuesta.json();
-        renderizarPropiedades();
-    } catch (error) {
-        console.error('Error:', error);
-        // Mostrar mensaje de error en el contenedor
-        const contenedor = document.getElementById('contenedor-propiedades');
-        contenedor.innerHTML = `
-            <div class="col-12">
-                <div class="alert alert-danger text-center">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    Error al cargar las propiedades. Por favor, intenta nuevamente más tarde.
-                </div>
-            </div>
-        `;
+    } else if (propiedades[idx]) {
+        imagenes = (propiedades[idx].imagenes && propiedades[idx].imagenes.length > 0) ? propiedades[idx].imagenes : [propiedades[idx].imagen || 'images/casa1.jpg'];
+    }
+    
+    if (imagenes && imagenes.length > 0) {
+        // Obtener índice actual desde el elemento
+        let currentIndex = parseInt(imgElement.dataset.currentIndex || 0);
+        
+        // Calcular nuevo índice
+        currentIndex += direction;
+        if (currentIndex < 0) {
+            currentIndex = imagenes.length - 1;
+        } else if (currentIndex >= imagenes.length) {
+            currentIndex = 0;
+        }
+        
+        // Actualizar imagen y contador
+        imgElement.src = imagenes[currentIndex];
+        imgElement.dataset.currentIndex = currentIndex;
+        counterElement.textContent = `${currentIndex + 1}/${imagenes.length}`;
     }
 }
 
-// Ejecutar la función cuando el DOM esté completamente cargado
+// Función para abrir lightbox (disponible globalmente)
+function abrirLightbox(imagenes, startIndex = 0) {
+    if (typeof window.abrirLightbox === 'function') {
+        window.abrirLightbox(imagenes, startIndex);
+    }
+}
+
+// Busca esta función en tu app.js y reemplázala completa:
+async function cargarPropiedades() {
+    try {
+        // 1. Primero miramos si el administrador guardó algo de forma local
+        const datosLocales = localStorage.getItem('propiedades_local');
+        
+        if (datosLocales) {
+            console.log("Sincronizado: Cargando datos desde el Panel Admin Local");
+            propiedades = JSON.parse(datosLocales);
+            renderizarPropiedades();
+        } else {
+            // 2. Si el panel está vacío, cargamos el JSON por defecto de tu computadora
+            console.log("Cargando archivo JSON por defecto");
+            const respuesta = await fetch('data/propiedades.json');
+            propiedades = await respuesta.json();
+            renderizarPropiedades();
+        }
+    } catch (error) {
+        console.error("Error al comunicar los archivos locales:", error);
+    }
+}
+
+// Asegúrate de que la función se esté ejecutando al cargar la página
 document.addEventListener('DOMContentLoaded', cargarPropiedades);
