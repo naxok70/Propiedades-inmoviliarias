@@ -1,7 +1,3 @@
-/* ==========================================================================
-   ESTILOS GENERALES Y ACCESO (LOGIN) PERFECTAMENTE CENTRADO
-   ========================================================================== */
-
 body { 
     max-width: 800px; 
     margin: 20px auto; 
@@ -9,7 +5,6 @@ body {
     font-family: system-ui, sans-serif; 
 }
 
-/* Centrado absoluto en toda la pantalla para el Login */
 #login-wrapper {
     display: table;
     position: fixed;
@@ -18,13 +13,10 @@ body {
     width: 100%;
     height: 100vh;
     z-index: 10000;
-    background-color: var(--background, #ffffff); /* Se adapta al modo claro/oscuro de Water.css */
+    background-color: var(--background, #ffffff);
 }
 
-#login-wrapper:not(:has(#login-section[style*="display: none"])) {
-    display: table;
-}
-
+/* Corregimos selectores reactivos para que el login-wrapper dependa del display real */
 #login-wrapper:has(#login-section[style*="display: none"]) {
     display: none !important;
 }
@@ -37,22 +29,13 @@ body {
     max-width: 400px;
 }
 
-/* Alineación de los elementos internos de la caja de Login */
-#login-section input {
+#login-section input, #login-section button {
     display: block;
     margin: 12px auto;
     width: 100%;
     max-width: 320px;
 }
 
-#login-section button {
-    display: block;
-    margin: 12px auto;
-    width: 100%;
-    max-width: 320px;
-}
-
-/* Mensaje de error de contraseña */
 #error-msg {
     color: #dc3545; 
     font-size: 0.9em; 
@@ -61,16 +44,10 @@ body {
     font-weight: 500;
 }
 
-/* ==========================================================================
-   ESTILOS DEL PANEL DE ADMINISTRACIÓN Y FORMULARIOS
-   ========================================================================== */
-
-/* Panel de control oculto hasta autenticarse */
 #admin-panel { 
     display: none; 
 }
 
-/* Contenedor dinámico de previsualización de imágenes */
 #preview-imagenes {
     display: flex; 
     gap: 10px; 
@@ -78,7 +55,6 @@ body {
     flex-wrap: wrap;
 }
 
-/* Tarjeta para renderizar cada propiedad listada */
 .propiedad-card { 
     border: 1px solid #f8f8f8; 
     padding: 15px; 
@@ -91,18 +67,15 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
 }
 
-/* Contenedor de botones de acción en las tarjetas */
 .acciones { 
     display: flex; 
     gap: 10px; 
 }
 
-/* Contenedor del botón de subida personalizado */
 .custom-file-upload {
     margin-bottom: 15px;
 }
 
-/* Estilo del nuevo botón para seleccionar fotos */
 .btn-subir {
     background-color: #f0f0f0;
     color: #333;
@@ -120,10 +93,6 @@ body {
     background-color: #e4e4e4;
     border-color: #999;
 }
-
-/* ==========================================================================
-   BOTONES PERSONALIZADOS DEL FORMULARIO
-   ========================================================================== */
 
 .btn-delete { 
     background: #ff0019; 
@@ -153,126 +122,54 @@ body {
 
 #btn-cancelar {
     display: none; 
-    background: #fd0404 !important; /* Fuerza tu color rojo sobre Water.css */
+    background: #fd0404 !important; 
     color: white !important;         
     width: 100%; 
     margin-top: 5px;
     border: none;
 }
-
-/* ==========================================================================
-   INTERFAZ DE PREVISUALIZACIÓN DE IMÁGENES (CON HOVER DE ELIMINACIÓN)
-   ========================================================================== */
-
-/* Contenedor uniforme de las miniaturas en el formulario */
-.preview-thumb-container {
+.preview-card {
     position: relative;
     display: inline-block;
-    width: 85px;
-    height: 85px;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    overflow: hidden; 
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin: 8px;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
 }
-
-.preview-thumb-container img {
+.preview-card:hover {
+    transform: scale(1.03);
+}
+.preview-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: filter 0.2s ease;
 }
-
-/* Capa oscura interactiva (Overlay) uniforme */
-.preview-thumb-overlay {
+.preview-card:hover .preview-img {
+    filter: brightness(0.75);
+}
+.btn-delete-preview {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(220, 53, 69, 0.85); 
+    background: rgba(220, 53, 69, 0.85);
     color: white;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0; 
-    cursor: pointer;
+    opacity: 0;
     transition: opacity 0.2s ease;
 }
-
-.preview-thumb-overlay span {
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.preview-thumb-container:hover .preview-thumb-overlay {
+.preview-card:hover .btn-delete-preview {
     opacity: 1;
-}
-
-/* Botón de eliminar estilizado de las tarjetas inferiores */
-.btn-delete-card {
-    background: #fff5f5; 
-    color: #e53e3e;      
-    border: 1px solid #fed7d7;
-    padding: 6px 14px;
-    border-radius: 6px;  
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 0.88em;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.2s ease;
-}
-
-.btn-delete-card:hover {
-    background: #e53e3e; 
-    color: #ffffff;
-    border-color: #e53e3e;
-    box-shadow: 0 2px 5px rgba(229, 62, 62, 0.2); 
-    transform: translateY(-1px); 
-}
-
-/* ==========================================================================
-   SISTEMA DE NOTIFICACIONES FLOTANTES (TOASTS)
-   ========================================================================== */
-
-#toast-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.toast-notification {
-    background: #2d3748; 
-    color: #ffffff;
-    padding: 12px 24px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    font-size: 0.95em;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-left: 4px solid #38a169; 
-    animation: slideIn 0.3s ease forwards;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
 }

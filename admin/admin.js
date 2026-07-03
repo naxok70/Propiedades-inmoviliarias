@@ -1,171 +1,171 @@
+// ==========================================
+// VARIABLES GLOBALES Y CONFIGURACIÓN
+// ==========================================
 let propiedades = [];
-let imagenesBase64 = [];
-// Al inicio de admin/admin.js
-const SUPABASE_URL = "https://tu-url-de-supabase.supabase.co"; // Tu url de project settings
-const SUPABASE_ANON_KEY = "sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6"; // La publishable key que me mostraste
+let archivosFotos = []; 
+let imagenesUrls = [];
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// Hash SHA-256 correspondiente a la contraseña "2026"
-const CONTRASEÑA_HASH_SECRETO = "2026";
+const SUPABASE_URL = "https://delswnqvmrupvobalqyr.supabase.co"; 
+const SUPABASE_ANON_KEY = "sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6"; 
 
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Función interna para generar el hash en tiempo real de forma segura
-async function sha256(string) {
-  const utf8 = new TextEncoder().encode(string);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+// ==========================================
+// 1. SISTEMA DE SEGURIDAD Y ACCESO (ASÍNCRONO)
+// ==========================================
+
+async function generarHash(texto) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(texto);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Comprobación de seguridad encriptada sin revelar la clave original
 async function verificarAcceso() {
   const inputClave = document.getElementById('access-key').value;
   const errorMsg = document.getElementById('error-msg');
   
-  // Encriptamos la clave introducida por el input
-  const hashInput = await sha256(inputClave);
-
-  // Comparamos los hashes criptográficos en vez de los textos planos
-  if (hashInput === CONTRASEÑA_HASH_SECRETO) {
-    errorMsg.style.display = 'none';
+  const hashIngresado = await generarHash(inputClave);
+  const hashCorrecto = "158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab"; 
+  
+  if (hashIngresado === hashCorrecto) {
+    if (errorMsg) errorMsg.style.display = 'none';
+    
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     
-    // Guardamos sesión temporal en la pestaña activa
     sessionStorage.setItem('admin_session', 'active');
-
     cargarPropiedades();
   } else {
-    errorMsg.style.display = 'block';
+    alert("Contraseña incorrecta");
+    if (errorMsg) errorMsg.style.display = 'block';
     document.getElementById('access-key').value = '';
   }
 }
 
-// Carga los datos desde el LocalStorage del navegador
-function cargarPropiedades() {
-  const datosLocales = localStorage.getItem('propiedades_local');
-  if (datosLocales) {
-    propiedades = JSON.parse(datosLocales);
-  } else {
-    // Caso base inicial de prueba si está vacío
-    propiedades = [
-      {
-        titulo: "Casa de Prueba Local en Vitacura",
-        precio: "12.500",
-        tipoPrecio: "/ Valor Total",
-        ubicacion: "Vitacura, Santiago",
-        piezas: 4,
-        banos: 3,
-        imagenes: ["images/casa1.jpg"]
-      }
-    ];
-    localStorage.setItem('propiedades_local', JSON.stringify(propiedades));
-  }
-  renderizarPropiedades();
-}
-
-// Escucha la tecla Enter en el campo de contraseña para mejorar la experiencia
-document.getElementById('access-key').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
-    verificarAcceso();
-  }
-});
-
-// Mantener la sesión iniciada de manera fluida si se recarga la página por accidente
+// ==========================================
+// 2. CONTROL DE EVENTOS CENTRALIZADO
+// ==========================================
 document.addEventListener("DOMContentLoaded", function() {
+  const btnLogin = document.getElementById('btn-login');
+  if (btnLogin) {
+    btnLogin.addEventListener('click', verificarAcceso);
+  }
+
+  const accessKeyInput = document.getElementById('access-key');
+  if (accessKeyInput) {
+    accessKeyInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        verificarAcceso();
+      }
+    });
+  }
+
+  const inputImagenes = document.getElementById('imagenes');
+  if (inputImagenes) {
+    inputImagenes.addEventListener('change', function(e) {
+      const preview = document.getElementById('preview-imagenes');
+      const files = Array.from(e.target.files);
+      
+      if (files.length === 0) return;
+
+      files.forEach(file => {
+        archivosFotos.push(file);
+        
+        const imgContainer = document.createElement('div');
+        imgContainer.classList.add('preview-card');
+        
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.classList.add('preview-img');
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '×';
+        deleteBtn.classList.add('btn-delete-preview');
+        
+        deleteBtn.onclick = function() {
+          const index = archivosFotos.indexOf(file);
+          if (index > -1) {
+            archivosFotos.splice(index, 1);
+          }
+          imgContainer.remove();
+        };
+        
+        imgContainer.appendChild(img);
+        imgContainer.appendChild(deleteBtn);
+        preview.appendChild(imgContainer);
+      });
+      
+      e.target.value = "";
+    });
+  }
+
   if (sessionStorage.getItem('admin_session') === 'active') {
-    document.getElementById('login-section').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'block';
+    if (document.getElementById('login-section')) document.getElementById('login-section').style.display = 'none';
+    if (document.getElementById('admin-panel')) document.getElementById('admin-panel').style.display = 'block';
     cargarPropiedades();
   }
 });
 
-// Preview de múltiples imágenes seleccionadas con opción individual de eliminación
-document.getElementById('imagenes').addEventListener('change', async function(e) {
-  const preview = document.getElementById('preview-imagenes');
-  const files = Array.from(e.target.files);
-  
-  if (files.length === 0) return;
+// ==========================================
+// 3. LOGICA DE NEGOCIO (CONEXIÓN SUPABASE)
+// ==========================================
 
-  const promesas = files.map(file => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        resolve(event.target.result);
-      };
-      reader.readAsDataURL(file);
-    });
-  });
-
+async function cargarPropiedades() {
   try {
-    const nuevosBase64 = await Promise.all(promesas);
-    
-    nuevosBase64.forEach(imgData => {
-      imagenesBase64.push(imgData);
-      
-      const imgContainer = document.createElement('div');
-      imgContainer.style.position = 'relative';
-      imgContainer.style.display = 'inline-block';
-      
-      const img = document.createElement('img');
-      img.src = imgData;
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '4px';
-      img.style.border = '1px solid #ddd';
-      
-      const deleteBtn = document.createElement('button');
-      deleteBtn.innerHTML = '×';
-      deleteBtn.style.position = 'absolute';
-      deleteBtn.style.top = '-8px';
-      deleteBtn.style.right = '-8px';
-      deleteBtn.style.background = '#6c757d';
-      deleteBtn.style.color = 'white';
-      deleteBtn.style.border = 'none';
-      deleteBtn.style.borderRadius = '50%';
-      deleteBtn.style.width = '20px';
-      deleteBtn.style.height = '20px';
-      deleteBtn.style.cursor = 'pointer';
-      deleteBtn.style.fontSize = '14px';
-      deleteBtn.style.lineHeight = '1';
-      
-      deleteBtn.onclick = function() {
-        const index = imagenesBase64.indexOf(imgData);
-        if (index > -1) {
-          imagenesBase64.splice(index, 1);
-        }
-        imgContainer.remove();
+    const { data, error } = await supabaseClient
+      .from('Proyecto') 
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) throw error;
+
+    propiedades = data.map(p => {
+      let urlsArray = [];
+      if (p.foto_url) {
+        urlsArray = p.foto_url.split(',').map(url => url.trim()).filter(url => url !== "");
+      }
+
+      return {
+        id_real: p.id,
+        titulo: p.nombre,
+        categoria: p.categoria || "Casa", 
+        precio: p.precio || "0",
+        tipoPrecio: p.tipo_precio || "/ Valor Total",
+        ubicacion: p.ubicacion || "",
+        piezas: p.piezas || 0,
+        banos: p.banos || 0,
+        imagenes: urlsArray
       };
-      
-      imgContainer.appendChild(img);
-      imgContainer.appendChild(deleteBtn);
-      preview.appendChild(imgContainer);
     });
+
   } catch (err) {
-    console.error("Error al procesar las imágenes locales:", err);
+    console.error("Error al cargar propiedades de Supabase:", err);
   }
   
-  e.target.value = "";
-});
+  renderizarPropiedades();
+}
 
-// DIBUJAR LAS TARJETAS DE PROPIEDADES EN EL PANEL
 function renderizarPropiedades() {
   const contenedor = document.getElementById('lista-propiedades');
+  if (!contenedor) return;
+  
   if (propiedades.length === 0) {
-    contenedor.innerHTML = "<p>No hay propiedades guardadas en la memoria local.</p>";
+    contenedor.innerHTML = "<p>No hay propiedades guardadas en Supabase.</p>";
     return;
   }
   
   contenedor.innerHTML = "";
   propiedades.forEach((p, idx) => {
-    const sufijo = p.tipoPrecio ? p.tipoPrecio : "/ Mes";
+    const sufijo = p.tipoPrecio ? p.tipoPrecio : "/ Total";
     contenedor.innerHTML += `
       <div class="propiedad-card">
         <div>
-          <strong style="font-size: 1.1em; color: #111;">${p.titulo}</strong><br>
+          <strong style="font-size: 1.1em; color: #111;">${p.titulo}</strong> 
+          <span style="font-size: 0.85em; background: #e0e0e0; color: #333; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">${p.categoria}</span><br>
           <span style="color: #28a745; font-weight: bold;">$${p.precio} ${sufijo}</span><br>
-          <small style="color: #666;">📍 ${p.ubicacion} | 🛏️ ${p.piezas} piezas | 🚿 ${p.banos} baños</small>
+          <small style="color: #666;">📍 ${p.ubicacion} | 🛏️ ${p.piezas} piezas | 🚿 ${p.banos} baños | 📸 ${p.imagenes.length} fotos</small>
         </div>
         <div class="acciones">
           <button onclick="prepararEditar(${idx})" class="btn-edit">✏️ Editar</button>
@@ -176,96 +176,138 @@ function renderizarPropiedades() {
   });
 }
 
-// CAPTURAR EL FORMULARIO (AGREGAR O EDITAR)
-document.getElementById('propiedad-form').addEventListener('submit', function(e) {
+document.getElementById('propiedad-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   const idx = document.getElementById('index-propiedad').value;
+  const btnGuardar = document.getElementById('btn-guardar');
   
-  if (idx === "" && imagenesBase64.length === 0) {
+  if (idx === "" && archivosFotos.length === 0) {
     alert("Por favor, selecciona al menos una imagen para la propiedad.");
     return;
   }
-  
-  const nuevaPropiedad = {
-    titulo: document.getElementById('titulo').value,
-    precio: document.getElementById('precio').value,
-    tipoPrecio: document.getElementById('tipoPrecio').value,
-    ubicacion: document.getElementById('ubicacion').value,
-    piezas: parseInt(document.getElementById('piezas').value),
-    banos: parseInt(document.getElementById('banos').value),
-    imagenes: imagenesBase64.length > 0 ? imagenesBase64 : (idx !== "" ? propiedades[idx].imagenes : [])
-  };
 
-  if (idx === "") {
-    propiedades.push(nuevaPropiedad);
-  } else {
-    propiedades[idx] = nuevaPropiedad;
+  btnGuardar.innerText = "⏳ Subiendo imágenes...";
+  btnGuardar.disabled = true;
+  
+  try {
+    let arrayUrlsFinales = [];
+
+    if (idx !== "") {
+      arrayUrlsFinales = [...imagenesUrls]; 
+    }
+
+    // CORRECCIÓN APLICADA: 'of' en vez de 'de'
+    if (archivosFotos.length > 0) {
+      for (const foto of archivosFotos) {
+        const nombreUnico = `${Date.now()}_${foto.name}`;
+        const { data: storageData, error: storageError } = await supabaseClient
+          .storage
+          .from('fotos')
+          .upload(nombreUnico, foto);
+
+        if (storageError) throw storageError;
+
+        const { data: urlData } = supabaseClient.storage.from('fotos').getPublicUrl(nombreUnico);
+        arrayUrlsFinales.push(urlData.publicUrl);
+      }
+    }
+
+    const stringFotosFinal = arrayUrlsFinales.join(',');
+
+    const payloadBD = {
+      nombre: document.getElementById('titulo').value,
+      categoria: document.getElementById('categoria').value,
+      precio: document.getElementById('precio').value,
+      tipo_precio: document.getElementById('tipoPrecio').value,
+      ubicacion: document.getElementById('ubicacion').value,
+      piezas: parseInt(document.getElementById('piezas').value) || 0,
+      banos: parseInt(document.getElementById('banos').value) || 0,
+      foto_url: stringFotosFinal
+    };
+
+    if (idx === "") {
+      const { error: insertError } = await supabaseClient
+        .from('Proyecto')
+        .insert([payloadBD]);
+
+      if (insertError) throw insertError;
+      alert("¡Éxito! Propiedad publicada con todas sus fotos correctamente.");
+    } else {
+      const idReal = propiedades[idx].id_real;
+      const { error: updateError } = await supabaseClient
+        .from('Proyecto')
+        .update(payloadBD)
+        .eq('id', idReal);
+
+      if (updateError) throw updateError;
+      alert("¡Éxito! Propiedad actualizada correctamente en la nube.");
+    }
+
+    await cargarPropiedades();
+    resetFormulario();
+
+  } catch (error) {
+    console.error("Error en la operación de Supabase:", error);
+    alert("Ocurrió un error al guardar: " + (error.message || error));
+  } finally {
+    btnGuardar.disabled = false;
+    btnGuardar.innerText = "Publicar Proyecto";
   }
-
-  localStorage.setItem('propiedades_local', JSON.stringify(propiedades, null, 2));
-  alert("¡Súper! Cambios guardados temporalmente en tu navegador.");
-  
-  renderizarPropiedades();
-  resetFormulario();
 });
 
-// ELIMINAR PROPIEDAD DE LA BASE LOCAL
-function eliminarPropiedad(idx) {
-  if (confirm(`¿Estás seguro de eliminar "${propiedades[idx].titulo}"?`)) {
-    propiedades.splice(idx, 1);
-    localStorage.setItem('propiedades_local', JSON.stringify(propiedades, null, 2));
-    renderizarPropiedades();
+async function eliminarPropiedad(idx) {
+  const target = propiedades[idx];
+  if (confirm(`¿Estás seguro de eliminar permanentemente "${target.titulo}"?`)) {
+    try {
+      const { error } = await supabaseClient
+        .from('Proyecto')
+        .delete()
+        .eq('id', target.id_real);
+
+      if (error) throw error;
+
+      alert("Eliminado con éxito.");
+      await cargarPropiedades();
+    } catch (err) {
+      alert("No se pudo eliminar: " + err.message);
+    }
   }
 }
 
-// PASAR DATOS AL FORMULARIO PARA EDITAR
 function prepararEditar(idx) {
   const p = propiedades[idx];
   document.getElementById('index-propiedad').value = idx;
   document.getElementById('titulo').value = p.titulo;
+  document.getElementById('categoria').value = p.categoria || "Casa"; 
   document.getElementById('precio').value = p.precio;
-  document.getElementById('tipoPrecio').value = p.tipoPrecio || "/ Mes";
+  document.getElementById('tipoPrecio').value = p.tipoPrecio || "/ Valor Total";
   document.getElementById('ubicacion').value = p.ubicacion;
   document.getElementById('piezas').value = p.piezas;
   document.getElementById('banos').value = p.banos;
   
   const preview = document.getElementById('preview-imagenes');
   preview.innerHTML = '';
-  imagenesBase64 = [];
+  archivosFotos = [];
+  imagenesUrls = [...p.imagenes]; 
+  
   if (p.imagenes && p.imagenes.length > 0) {
-    p.imagenes.forEach((imgSrc, imgIndex) => {
-      imagenesBase64.push(imgSrc);
-      
+    p.imagenes.forEach(url => {
+      if(url === "") return;
       const imgContainer = document.createElement('div');
-      imgContainer.style.position = 'relative';
-      imgContainer.style.display = 'inline-block';
+      imgContainer.classList.add('preview-card');
       
       const img = document.createElement('img');
-      img.src = imgSrc;
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '4px';
-      img.style.border = '1px solid #ddd';
+      img.src = url;
+      img.classList.add('preview-img');
       
       const deleteBtn = document.createElement('button');
       deleteBtn.innerHTML = '×';
-      deleteBtn.style.position = 'absolute';
-      deleteBtn.style.top = '-8px';
-      deleteBtn.style.right = '-8px';
-      deleteBtn.style.background = '#6c757d';
-      deleteBtn.style.color = 'white';
-      deleteBtn.style.border = 'none';
-      deleteBtn.style.borderRadius = '50%';
-      deleteBtn.style.width = '20px';
-      deleteBtn.style.height = '20px';
-      deleteBtn.style.cursor = 'pointer';
-      deleteBtn.style.fontSize = '14px';
-      deleteBtn.style.lineHeight = '1';
+      deleteBtn.classList.add('btn-delete-preview');
+      
       deleteBtn.onclick = function() {
-        const index = imagenesBase64.indexOf(imgSrc);
-        if (index > -1) {
-          imagenesBase64.splice(index, 1);
+        const urlIndex = imagenesUrls.indexOf(url);
+        if (urlIndex > -1) {
+          imagenesUrls.splice(urlIndex, 1);
         }
         imgContainer.remove();
       };
@@ -277,23 +319,24 @@ function prepararEditar(idx) {
   }
   
   document.getElementById('form-title').innerText = "✏️ Editando: " + p.titulo;
-  document.getElementById('btn-guardar').innerText = "💾 Actualizar de forma Local";
+  document.getElementById('btn-guardar').innerText = "💾 Actualizar en Internet";
   document.getElementById('btn-cancelar').style.display = "inline-block";
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// RESETEAR EL FORMULARIO A SU ESTADO INICIAL
 function resetFormulario() {
   document.getElementById('propiedad-form').reset();
   document.getElementById('index-propiedad').value = "";
-  document.getElementById('preview-imagenes').innerHTML = '';
-  imagenesBase64 = [];
+  document.getElementById('categoria').value = "";
+  const preview = document.getElementById('preview-imagenes');
+  if (preview) preview.innerHTML = '';
+  archivosFotos = [];
+  imagenesUrls = [];
   document.getElementById('form-title').innerText = "➕ Añadir Nueva Propiedad";
-  document.getElementById('btn-guardar').innerText = "💾 Guardar Cambios Localmente";
+  document.getElementById('btn-guardar').innerText = "💾 Publicar Proyecto";
   document.getElementById('btn-cancelar').style.display = "none";
 }
 
-// CERRAR SESIÓN
 function cerrarSesion() {
   sessionStorage.removeItem('admin_session');
   document.getElementById('admin-panel').style.display = 'none';

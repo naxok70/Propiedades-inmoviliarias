@@ -331,3 +331,8 @@ footer p {
         font-size: 28px;
     }
 }
+/* Efecto visual al pasar el cursor sobre la foto del catálogo */
+.image-carousel img:hover {
+    transform: scale(1.02);
+    filter: brightness(0.95);
+}

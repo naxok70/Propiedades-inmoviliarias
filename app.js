@@ -1,149 +1,168 @@
 // ==========================================
-// CONFIGURACIÓN DE SUPABASE
+// CONFIGURACIÓN DE SUPABASE - VISTA PÚBLICA
 // ==========================================
-// RECUERDA: Coloca tu URL real de Supabase aquí
-const SUPABASE_URL = "https://tu-url-de-supabase.supabase.co"; 
+const SUPABASE_URL = "https://delswnqvmrupvobalqyr.supabase.co"; 
 const SUPABASE_ANON_KEY = "sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6"; 
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Variable para almacenar las propiedades cargadas desde SUPABASE
-let propiedades = [];
+let propiedades = [];            
+let todasLasPropiedades = [];     
 
-// Función para fomentar precio en pesos chilenos
 function formatearPrecio(precio) {
+    const num = parseInt(String(precio).replace(/\./g, '')) || 0;
     return new Intl.NumberFormat('es-CL', {
         style: 'currency',
         currency: 'CLP',
         minimumFractionDigits: 0
-    }).format(precio);
+    }).format(num);
 }
 
-// Función para renderizar las tarjetas de propiedades
+// Renderiza las tarjetas usando la lista de propiedades actual
 function renderizarPropiedades() {
     const contenedor = document.getElementById('contenedor-propiedades');
-    
-    // Limpiar el contenedor
+    if (!contenedor) return;
     contenedor.innerHTML = '';
     
-    // Recorrer el array de propiedades y crear las tarjetas
+    if (propiedades.length === 0) {
+        contenedor.innerHTML = `
+            <div class="col-12 text-center text-muted p-5">
+                <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+                No hay propiedades disponibles en esta categoría por el momento.
+            </div>`;
+        return;
+    }
+    
     propiedades.forEach((propiedad, idx) => {
         const col = document.createElement('div');
         col.className = 'col-12 col-sm-6 col-md-4 col-lg-4';
         
         const card = document.createElement('div');
-        card.className = 'card property-card';
+        card.className = 'card property-card h-100 shadow-sm border-0';
         
-        // Obtener imágenes desde el array de Supabase o usar fallback
-        const imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : ['images/casa1.jpg'];
+        const imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : ['imagenes/casa1.jpg'];
         const primeraImagen = imagenes[0];
         
         const cardId = `propiedad-${idx}`;
         const imgId = `img-${idx}`;
         const counterId = `counter-${idx}`;
+        const sufijo = propiedad.tipoPrecio ? propiedad.tipoPrecio : "/ Valor Total";
+        
+        // CORRECCIÓN: Armamos el mensaje automático para WhatsApp codificando el texto para URLs
+        const numeroTelefono = "56985519073"; // El número principal de contacto
+        const textoMensaje = `Hola, me interesa la propiedad publicada: "${propiedad.titulo}" con un valor de ${formatearPrecio(propiedad.precio)} ${sufijo}. Me gustaría recibir más información.`;
+        const urlWhatsapp = `https://wa.me/${numeroTelefono}?text=${encodeURIComponent(textoMensaje)}`;
         
         card.innerHTML = `
-            <div class="image-carousel">
-                <button class="carousel-nav carousel-prev" onclick="cambiarImagen('${cardId}', -1)">‹</button>
-                <img id="${imgId}" src="${primeraImagen}" alt="${propiedad.titulo}" loading="lazy" data-current-index="0">
-                <button class="carousel-nav carousel-next" onclick="cambiarImagen('${cardId}', 1)">›</button>
-                <div id="${counterId}" class="image-counter">1/${imagenes.length}</div>
+            <div class="image-carousel" style="position: relative; overflow: hidden;">
+                <button class="carousel-nav carousel-prev" onclick="cambiarImagen('${cardId}', -1); event.stopPropagation();" style="display: ${imagenes.length > 1 ? 'block' : 'none'}">‹</button>
+                <img id="${imgId}" src="${primeraImagen}" alt="${propiedad.titulo}" loading="lazy" data-current-index="0" 
+                     onclick="ampliarImagen(this.src)" 
+                     title="Haz clic para expandir la imagen"
+                     style="height: 220px; object-fit: cover; width: 100%; cursor: pointer; transition: transform 0.2s ease;">
+                <button class="carousel-nav carousel-next" onclick="cambiarImagen('${cardId}', 1); event.stopPropagation();" style="display: ${imagenes.length > 1 ? 'block' : 'none'}">›</button>
+                <div id="${counterId}" class="image-counter" style="display: ${imagenes.length > 1 ? 'block' : 'none'}">1/${imagenes.length}</div>
             </div>
-            <div class="card-body">
-                <h5 class="card-title">${propiedad.titulo}</h5>
-                <p class="price">${formatearPrecio(propiedad.precio)}</p>
-                <div class="features">
+            <div class="card-body d-flex flex-column">
+                <div>
+                    <span class="badge bg-secondary mb-2">${propiedad.categoria}</span>
+                </div>
+                <h5 class="card-title fw-bold" style="color: #111;">${propiedad.titulo}</h5>
+                <p class="price text-success fw-bold fs-5 mb-2">${formatearPrecio(propiedad.precio)} <span style="font-size: 0.7em; color: #666; font-weight: normal;">${sufijo}</span></p>
+                <div class="features mb-2 d-flex gap-3 text-muted small">
                     <span class="feature">
-                        <i class="bi bi-door-open-fill"></i>
+                        <i class="bi bi-door-open-fill me-1"></i>
                         ${propiedad.piezas} ${propiedad.piezas === 1 ? 'pieza' : 'piezas'}
                     </span>
                     <span class="feature">
-                        <i class="bi bi-droplet-fill"></i>
+                        <i class="bi bi-droplet-fill me-1"></i>
                         ${propiedad.banos} ${propiedad.banos === 1 ? 'baño' : 'baños'}
                     </span>
                 </div>
-                <p class="location mb-3">
-                    <i class="bi bi-geo-alt-fill"></i>
+                <p class="location text-muted small mb-3 mt-auto">
+                    <i class="bi bi-geo-alt-fill me-1 text-danger"></i>
                     ${propiedad.ubicacion}
                 </p>
-                <button class="btn btn-primary btn-contact w-100">
-                    <i class="bi bi-telephone-fill me-2"></i>
-                    Contactar
-                </button>
+                
+                <a href="${urlWhatsapp}" target="_blank" class="btn btn-primary btn-contact w-100 mt-2 d-flex align-items-center justify-content-center" style="text-decoration: none;">
+                    <i class="bi bi-whatsapp me-2"></i>
+                    Contactar 
+                </a>
             </div>
         `;
         
-        // Guardar las imágenes en el elemento para usarlas en el carrusel
         card.dataset.imagenes = JSON.stringify(imagenes);
-        
         col.appendChild(card);
         contenedor.appendChild(col);
     });
 }
 
-// Función global para cambiar imágenes en el carrusel (Adaptada para Supabase)
 function cambiarImagen(cardId, direction) {
     const idx = parseInt(cardId.replace('propiedad-', ''));
     const imgElement = document.getElementById(`img-${idx}`);
     const counterElement = document.getElementById(`counter-${idx}`);
     
     let imagenes;
-    
-    // Leemos directamente del arreglo en memoria sincronizado de Supabase
     if (propiedades[idx]) {
-        imagenes = (propiedades[idx].imagenes && propiedades[idx].imagenes.length > 0) ? propiedades[idx].imagenes : ['images/casa1.jpg'];
+        imagenes = (propiedades[idx].imagenes && propiedades[idx].imagenes.length > 0) ? propiedades[idx].imagenes : ['imagenes/casa1.jpg'];
     }
     
-    if (imagenes && imagenes.length > 0) {
-        // Obtener índice actual desde el elemento
+    if (imagenes && imagenes.length > 1) {
         let currentIndex = parseInt(imgElement.dataset.currentIndex || 0);
-        
-        // Calcular nuevo índice
         currentIndex += direction;
         if (currentIndex < 0) {
-            currentIndex = imagenes.length - 1;
+            currentIndex = imagery.length - 1;
         } else if (currentIndex >= imagenes.length) {
             currentIndex = 0;
         }
         
-        // Actualizar imagen y contador
         imgElement.src = imagenes[currentIndex];
         imgElement.dataset.currentIndex = currentIndex;
         counterElement.textContent = `${currentIndex + 1}/${imagenes.length}`;
     }
 }
 
-// Función para abrir lightbox (disponible globalmente)
-function abrirLightbox(imagenes, startIndex = 0) {
-    if (typeof window.abrirLightbox === 'function') {
-        window.abrirLightbox(imagenes, startIndex);
+function ampliarImagen(urlImagen) {
+    const imagenGrande = document.getElementById('imagenGrandeVisor');
+    const modalElement = document.getElementById('visorImagenModal');
+    
+    if (imagenGrande && modalElement) {
+        imagenGrande.src = urlImagen;
+        const miVisorModal = new bootstrap.Modal(modalElement);
+        miVisorModal.show();
     }
 }
 
-// CARGA LOS DATOS EN TIEMPO REAL DESDE SUPABASE
 async function cargarPropiedades() {
     try {
         console.log("Sincronizando: Conectando a Supabase Cloud...");
         
-        const { data, error } = await supabase
-            .from('proyecto') // El nombre de la tabla en tu Supabase
+        const { data, error } = await supabaseClient
+            .from('Proyecto') 
             .select('*')
-            .order('id', { ascending: false }); // Trae los registros más nuevos arriba
+            .order('id', { ascending: false }); 
 
         if (error) throw error;
 
-        // Mapeamos lo que llega de la BD de internet al formato de tu array
-        propiedades = data.map(p => ({
-            titulo: p.nombre,
-            precio: p.precio || "0",
-            tipoPrecio: p.tipo_precio || "/ Valor Total",
-            ubicacion: p.ubicacion || "",
-            piezas: p.piezas || 0,
-            banos: p.banos || 0,
-            imagenes: p.foto_url ? [p.foto_url] : [] // Lo inyectamos en formato array
-        }));
+        todasLasPropiedades = data.map(p => {
+            let urlsArray = [];
+            if (p.foto_url) {
+                urlsArray = p.foto_url.split(',').map(url => url.trim()).filter(url => url !== "");
+            }
 
-        // Dibujamos las propiedades reales ya descargadas
+            return {
+                titulo: p.nombre,
+                categoria: p.categoria || "Casa", 
+                precio: p.precio || "0",
+                tipoPrecio: p.tipo_precio || "/ Valor Total",
+                ubicacion: p.ubicacion || "",
+                piezas: p.piezas || 0,
+                banos: p.banos || 0,
+                imagenes: urlsArray 
+            };
+        });
+
+        propiedades = [...todasLasPropiedades];
         renderizarPropiedades();
 
     } catch (error) {
@@ -151,5 +170,26 @@ async function cargarPropiedades() {
     }
 }
 
-// Ejecución al cargar la página de clientes
-document.addEventListener('DOMContentLoaded', cargarPropiedades);
+function filtrarCategoria(catSeleccionada) {
+    const botones = document.querySelectorAll('.filter-btn');
+    botones.forEach(btn => btn.classList.remove('active'));
+    
+    if (window.event && window.event.target) {
+        window.event.target.classList.add('active');
+    }
+
+    if (catSeleccionada === 'Todos') {
+        propiedades = [...todasLasPropiedades];
+    } else {
+        propiedades = todasLasPropiedades.filter(p => p.categoria === catSeleccionada);
+    }
+    
+    renderizarPropiedades();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargarPropiedades();
+    window.filtrarCategoria = filtrarCategoria;
+    window.cambiarImagen = cambiarImagen; 
+    window.ampliarImagen = ampliarImagen; 
+});

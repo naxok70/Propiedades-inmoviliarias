@@ -32,7 +32,7 @@
             <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="#">Inicio</a>
-                    </li>
+                     Papel>
                     <li class="nav-item">
                         <a class="nav-link" href="#propiedades">Propiedades</a>
                     </li>
@@ -47,16 +47,27 @@
     <section class="hero-section">
         <div class="container">
             <h1>Encuentra tu hogar ideal</h1>
-            <p>Casas y departamentos en venta con las mejores condiciones</p>
+            <p>Casas, departamentos y terrenos con las mejores condiciones</p>
         </div>
     </section>
 
     <section id="propiedades" class="container mb-5">
         <div class="row">
             <div class="col-12">
-                <h2 class="text-center mb-4">Propiedades Disponibles</h2>
+                <h2 class="text-center mb-2">Propiedades Disponibles</h2>
+                <p class="text-center text-muted mb-4">Filtra nuestro catálogo según lo que estés buscando</p>
             </div>
         </div>
+
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-center gap-2 flex-wrap">
+                <button class="btn btn-outline-dark active filter-btn" onclick="filtrarCategoria('Todos')">✨ Todos</button>
+                <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Casa')">🏡 Casas</button>
+                <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Departamento')">🏢 Departamentos</button>
+                <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Terreno')">🌱 Terrenos</button>
+            </div>
+        </div>
+
         <div id="contenedor-propiedades" class="row g-4">
             </div>
     </section>
@@ -136,5 +147,6 @@
     </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script> <script src="main.js"></script> </body>
+    <script src="app.js"></script>
+</body>
 </html>
