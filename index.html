@@ -11,312 +11,24 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link class="preconnect" href="https://fonts.googleapis.com">
+    <link class="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
     
-    <style>
-        :root {
-            --primary-color: #141b22;
-            --secondary-color: #02131f;
-            --accent-color: #a0523d; /* Tono café/terracota elegante que se ve en la imagen */
-        }
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #faf6e3;
-            color: #2d3748;
-        }
-        
-        /* Navbar completamente transparente y flotando sobre el contenido */
-        .navbar {
-            background-color: transparent ; 
-            backdrop-filter: none ;        
-            box-shadow: none;                                
-            padding-top: 1.5rem;
-            padding-bottom: 1.5rem;
-            position: absolute;                               
-            width: 100%;
-            top: 0;
-            left: 0;
-            z-index: 1000;                                   
-        }
-        
-        .navbar-brand {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-
-        .navbar-nav .nav-link {
-            font-weight: 500;
-            font-size: 1rem;
-        }
-        
-        /* HERO SECTION */
-        .hero-section {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)), url('imagenes/Habitacion_fondo.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: rgb(255, 255, 255);
-            padding: 10rem 0 7rem 0; 
-            text-align: center;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-        
-        .hero-section h1 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-size: 3.5rem;
-            margin-bottom: 0.8rem;
-            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
-        }
-        
-        .hero-section p {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 400;
-            opacity: 0.95;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Sección títulos de catálogo */
-        h2.text-center {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            color: var(--secondary-color);
-            font-size: 2.2rem;
-        }
-        
-        /* Tarjetas de propiedades */
-        .property-card {
-            border: none;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-            background-color: #ffffff;
-        }
-        
-        .property-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-        }
-        
-        .property-card img {
-            height: 220px;
-            object-fit: cover;
-            width: 100%;
-        }
-        
-        .property-card .card-body {
-            padding: 1.5rem;
-        }
-        
-        .property-card .card-title {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-            color: var(--secondary-color);
-        }
-        
-        .property-card .price {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--accent-color);
-            margin-bottom: 1rem;
-        }
-        
-        .property-card .features {
-            display: flex;
-            gap: 1.2rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-        
-        .property-card .feature {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.9rem;
-            color: #718096;
-            font-weight: 500;
-        }
-        
-        .property-card .feature i {
-            color: #a0aec0;
-        }
-        
-        .property-card .location {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.9rem;
-            color: #718096;
-            font-weight: 500;
-        }
-        
-        .property-card .location i {
-            color: #a0aec0;
-        }
-        
-        .btn-contact {
-            background-color: #000000; /* Se restauró el color turquesa/celeste de tu diseño original */
-            border: none;
-            padding: 0.6rem 1.5rem;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .btn-contact:hover {
-            background-color: #86898a;
-        }
-        
-        /* FOOTER CON LA IMAGEN DE FONDO */
-        footer {
-            background-image: url('imagenes/Fondo_negro.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: rgb(255, 255, 255);
-            padding: 4.5rem 0 2rem 0;
-            margin-top: 4rem;
-            text-align: center;
-        }
-
-        footer h4 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-        }
-
-        footer p {
-            font-weight: 400;
-            font-size: 0.95rem;
-            color: #e2e8f0;
-        }
-        
-        @media (max-width: 768px) {
-            .hero-section h1 {
-                font-size: 2.3rem;
-            }
-            
-            .hero-section p {
-                font-size: 1.1rem;
-            }
-            
-            .property-card img {
-                height: 190px;
-            }
-        }
-
-        /* Carrusel de imágenes en tarjeta */
-        .image-carousel {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .image-carousel img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-        }
-
-        .carousel-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: background 0.3s ease;
-            z-index: 10;
-        }
-
-        .carousel-nav:hover {
-            background: rgba(0, 0, 0, 0.7);
-        }
-
-        .carousel-prev { left: 8px; }
-        .carousel-next { right: 8px; }
-
-        .image-counter {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            z-index: 10;
-        }
-
-        /* Botón flotante de WhatsApp */
-        .wsp-flotante {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            bottom: 40px;
-            right: 40px;
-            background-color: #25d366;
-            color: #fff !important;
-            border-radius: 50%;
-            text-align: center;
-            font-size: 35px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-
-        .wsp-flotante:hover {
-            background-color: #20ba5a;
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 768px) {
-            .wsp-flotante {
-                width: 50px;
-                height: 50px;
-                bottom: 20px;
-                right: 20px;
-                font-size: 28px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-house-door-fill me-2"></i>
-                IR Gestion Inmobiliaria Spa
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+   <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand border border-white text-white px-3 py-2 rounded d-inline-flex align-items-center" href="#" style="font-weight: 600;">
+            <i class="bi bi-house-door-fill me-2 text-white"></i>
+            IR Gestion Inmobiliaria Spa
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="#">Inicio</a>
                     </li>
@@ -345,20 +57,24 @@
             </div>
         </div>
         <div id="contenedor-propiedades" class="row g-4">
-        </div>
+            </div>
     </section>
 
     <footer id="contacto">
         <div class="container">
-            <div class="row">
-                <div class="col-12">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-6 text-md-start text-center mb-4 mb-md-0">
                     <h4>Contáctanos</h4>
                     <p class="mb-3">
-                        <i class="bi bi-telephone-fill me-2"></i>
+                        <i class="bi bi-telephone-fill me-2 text-info"></i>
                         +56 9 8551 9073
                     </p>
                     <p class="mb-3">
-                        <i class="bi bi-envelope-fill me-2"></i>
+                        <i class="bi bi-telephone-fill me-2 text-info"></i>
+                        +56 9 8369 4851
+                    </p>
+                    <p class="mb-3">
+                        <i class="bi bi-envelope-fill me-2 text-info"></i>
                         contactoirpropiedades@gmail.com
                     </p>
                     <p class="mb-0">
@@ -372,9 +88,30 @@
                         </a>
                     </p>
                 </div>
+
+                <div class="col-12 col-md-6 text-center">
+                    <div class="qr-wrapper">
+                        <div>
+                            <div class="qr-container">
+                                <img src="imagenes/qr_instagram.jpeg" alt="QR Instagram" class="qr-img">
+                            </div>
+                            <div class="qr-box-text">Escanéanos en Instagram</div>
+                        </div>
+                        
+                        <div>
+                            <div class="qr-container">
+                                <img src="imagenes/qr_wsp.jpeg" alt="QR WhatsApp" class="qr-img">
+                            </div>
+                            <div class="qr-box-text">Escríbenos por WhatsApp</div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <hr class="my-4" style="border-color: rgba(255,255,255,0.15);">
-            <p class="mb-0" style="font-size: 0.85rem; color: #a0aec0;">&copy; 2026 IR Gestion Inmobiliaria Spa. Todos los derechos reservados.</p>
+            <div class="text-center">
+                <p class="mb-0" style="font-size: 0.85rem; color: #a0aec0;">&copy; 2026 IR Gestion Inmobiliaria Spa. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 
@@ -398,110 +135,5 @@
     </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="app.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const datosLocales = localStorage.getItem('propiedades_local');
-            if (datosLocales) {
-                const propiedades = JSON.parse(datosLocales);
-                const contenedor = document.getElementById("contenedor-propiedades");
-                
-                if (contenedor) {
-                    contenedor.innerHTML = "";
-                    
-                    propiedades.forEach((p, idx) => {
-                        const imagenes = (p.imagenes && p.imagenes.length > 0) ? p.imagenes : [p.imagen || 'images/casa1.jpg'];
-                        const primeraImagen = imagenes[0];
-
-                        const cardId = `propiedad-${idx}`;
-                        const imgId = `img-${idx}`;
-                        const counterId = `counter-${idx}`;
-                        
-                        const sufijoPrecio = p.tipoPrecio ? p.tipoPrecio : "/ Mes";
-
-                        contenedor.innerHTML += `
-                            <div class="col-12 col-md-6 col-lg-4">
-                                <div class="property-card card" data-propiedad-id="${idx}">
-                                    <div class="image-carousel">
-                                        <button class="carousel-nav carousel-prev" onclick="cambiarImagen('${cardId}', -1)">‹</button>
-                                        <img id="${imgId}" src="${primeraImagen}" alt="${p.titulo}" data-current-index="0" style="cursor: pointer;" onclick="abrirVisor('${imgId}')">
-                                        <button class="carousel-nav carousel-next" onclick="cambiarImagen('${cardId}', 1)">›</button>
-                                        <div id="${counterId}" class="image-counter">1/${imagenes.length}</div>
-                                    </div>
-                                    <div class="card-body">
-                                        <h5 class="card-title">${p.titulo}.</h5>
-                                        
-                                        <div class="price">$${p.precio} ${sufijoPrecio}</div>
-                                        
-                                        <div class="features mb-3">
-                                            <div class="feature"><i class="bi bi-door-open"></i> ${p.piezas} piezas</div>
-                                            <div class="feature"><i class="bi bi-droplet"></i> ${p.banos} baños</div>
-                                        </div>
-                                        <div class="location mb-3"><i class="bi bi-geo-alt"></i> ${p.ubicacion}</div>
-                                        
-                                        <a href="https://wa.me/56985519073?text=${encodeURIComponent(`Hola, estoy interesado en la propiedad: ${p.titulo}`)}" 
-                                           target="_blank" 
-                                           class="btn btn-contact text-white w-100 d-flex align-items-center justify-content-center" 
-                                           style="text-decoration: none;">
-                                            <i class="bi bi-whatsapp me-2"></i>Contactar
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-
-                        setTimeout(() => {
-                            const cardElement = document.querySelector(`[data-propiedad-id="${idx}"]`);
-                            if (cardElement) {
-                                cardElement.dataset.imagenes = JSON.stringify(imagenes);
-                                cardElement.dataset.currentIndex = 0;
-                            }
-                        }, 0);
-                    });
-                }
-            }
-        });
-
-        function cambiarImagen(cardId, direction) {
-            const idx = cardId.replace('propiedad-', '');
-            const imgElement = document.getElementById(`img-${idx}`);
-            const counterElement = document.getElementById(`counter-${idx}`);
-            
-            const datosLocales = localStorage.getItem('propiedades_local');
-            if (datosLocales) {
-                const propiedades = JSON.parse(datosLocales);
-                const propiedad = propiedades[idx];
-                
-                if (propiedad) {
-                    const imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : [propiedad.imagen || 'images/casa1.jpg'];
-                    
-                    let currentIndex = parseInt(imgElement.dataset.currentIndex || 0);
-                    
-                    currentIndex += direction;
-                    if (currentIndex < 0) {
-                        currentIndex = imagenes.length - 1;
-                    } else if (currentIndex >= imagenes.length) {
-                        currentIndex = 0;
-                    }
-                    
-                    imgElement.src = imagenes[currentIndex];
-                    imgElement.dataset.currentIndex = currentIndex;
-                    counterElement.textContent = `${currentIndex + 1}/${imagenes.length}`;
-                }
-            }
-        }
-
-        function abrirVisor(imgId) {
-            const imgPequeña = document.getElementById(imgId);
-            const imgGrande = document.getElementById('imagenGrandeVisor');
-            
-            if (imgPequeña && imgGrande) {
-                imgGrande.src = imgPequeña.src;
-                const miModal = new bootstrap.Modal(document.getElementById('visorImagenModal'));
-                miModal.show();
-            }
-        }
-    </script>
-</body>
+    <script src="app.js"></script> <script src="main.js"></script> </body>
 </html>

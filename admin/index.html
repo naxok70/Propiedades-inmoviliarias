@@ -5,23 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel de Administración - Corredora</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-  <style>
-    body { max-width: 800px; margin: 20px auto; padding: 0 20px; font-family: system-ui, sans-serif; }
-    .propiedad-card { border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .acciones { display: flex; gap: 10px; }
-    #login-section { text-align: center; margin-top: 100px; max-width: 400px; margin-left: auto; margin-right: auto; padding: 30px; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9; }
-    #admin-panel { display: none; }
-    .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-    .btn-edit { background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-  </style>
+  <link rel="stylesheet" href="admin.css">
 </head>
 <body>
 
-  <div id="login-section">
-    <h2>🔒 Acceso al Panel Inmobiliario (Modo Local)</h2>
-    <p>Escribe cualquier cosa para ingresar y probar el diseño del panel.</p>
-    <input type="password" id="access-key" placeholder="Escribe cualquier clave aquí...">
-    <button onclick="verificarAcceso()">Ingresar al Panel</button>
+  <div id="login-wrapper">
+    <div id="login-section">
+      <h2>🔒 Acceso al Panel Inmobiliaria</h2>
+      <p>Ingresa la contraseña de administrador para gestionar las propiedades.</p>
+      <input type="password" id="access-key" placeholder="Escribe la contraseña aquí...">
+      <button onclick="verificarAcceso()">Ingresar al Panel</button>
+      <div id="error-msg">Contraseña incorrecta. Inténtalo de nuevo.</div>
+    </div>
   </div>
 
   <div id="admin-panel">
@@ -41,7 +36,7 @@
       <div style="display: flex; gap: 20px; align-items: flex-end;">
         <div style="flex: 2;">
           <label><b>Precio:</b></label>
-          <input type="text" id="precio" required placeholder="Ej: $250.000.000 o UF 10.500">
+          <input type="text" id="precio" required placeholder="Ej: 250.000.000 o 10.500">
         </div>
         <div style="flex: 1;">
           <label><b>Tipo de Cobro:</b></label>
@@ -68,271 +63,27 @@
       </div>
       
       <label><b>Fotos de la Propiedad:</b></label>
-      <input type="file" id="imagenes" multiple accept="image/*">
-      <small style="color: #666;">Selecciona Imágenes</small>
-      <div id="preview-imagenes" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
+      <div class="custom-file-upload">
+        <input type="file" id="imagenes" multiple accept="image/*" style="display: none;">
+        <button type="button" onclick="document.getElementById('imagenes').click()" class="btn-subir">
+          📸 Seleccionar Imágenes
+        </button>
+      </div>
+      <div id="preview-imagenes"></div>
 
-      <button type="submit" id="btn-guardar" style="background: #28a745; color:white; width: 100%; font-size: 1.1em; cursor: pointer;">💾 Guardar Cambios Localmente</button>
-      <button type="button" id="btn-cancelar" style="display:none; background:#6c757d; width: 100%; margin-top: 5px;">Cancelar Edición</button>
+      <button type="submit" id="btn-guardar">💾 Guardar Cambios Localmente</button>
+      <button type="button" id="btn-cancelar" onclick="resetFormulario()">Cancelar Edición</button>
     </form>
 
     <hr style="margin: 40px 0;">
 
-    <h2>📋 Propiedades Publicadas Actualmente (Vista Local)</h2>
+    <h2>📋 Propiedades Publicadas Actualmente</h2>
     <div id="lista-propiedades">Cargando base de datos local...</div>
   </div>
 
-  <script>
-    let propiedades = [];
-    let imagenesBase64 = [];
+  <div id="toast-container"></div>
 
-    // Preview de imágenes seleccionadas con opción de eliminar
-   // Lógica optimizada para cargar múltiples imágenes sin bloqueos
-    document.getElementById('imagenes').addEventListener('change', async function(e) {
-      const preview = document.getElementById('preview-imagenes');
-      const files = Array.from(e.target.files);
-      
-      if (files.length === 0) return;
-
-      // Procesamos todas las fotos en paralelo de forma asíncrona
-      const promesas = files.map(file => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            resolve(event.target.result);
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-
-      try {
-        // Esperamos que se carguen todas de forma limpia
-        const nuevosBase64 = await Promise.all(promesas);
-        
-        // Las sumamos al arreglo global
-        nuevosBase64.forEach(imgData => {
-          imagenesBase64.push(imgData);
-          
-          // Creamos la interfaz del preview con su botón de eliminar
-          const imgContainer = document.createElement('div');
-          imgContainer.style.position = 'relative';
-          imgContainer.style.display = 'inline-block';
-          
-          const img = document.createElement('img');
-          img.src = imgData;
-          img.style.width = '80px';
-          img.style.height = '80px';
-          img.style.objectFit = 'cover';
-          img.style.borderRadius = '4px';
-          img.style.border = '1px solid #ddd';
-          
-          const deleteBtn = document.createElement('button');
-          deleteBtn.innerHTML = '×';
-          deleteBtn.style.position = 'absolute';
-          deleteBtn.style.top = '-8px';
-          deleteBtn.style.right = '-8px';
-          deleteBtn.style.background = '#6c757d';
-          deleteBtn.style.color = 'white';
-          deleteBtn.style.border = 'none';
-          deleteBtn.style.borderRadius = '50%';
-          deleteBtn.style.width = '20px';
-          deleteBtn.style.height = '20px';
-          deleteBtn.style.cursor = 'pointer';
-          deleteBtn.style.fontSize = '14px';
-          deleteBtn.style.lineHeight = '1';
-          
-          deleteBtn.onclick = function() {
-            const index = imagenesBase64.indexOf(imgData);
-            if (index > -1) {
-              imagenesBase64.splice(index, 1);
-            }
-            imgContainer.remove();
-          };
-          
-          imgContainer.appendChild(img);
-          imgContainer.appendChild(deleteBtn);
-          preview.appendChild(imgContainer);
-        });
-      } catch (err) {
-        console.error("Error al procesar las imágenes locales:", err);
-      }
-      
-      // Limpiamos el input para que te deje volver a seleccionar los mismos archivos si quieres
-      e.target.value = "";
-    });
-    // 1. CARGAR DATOS LOCALES DESDE EL NAVEGADOR
-    function verificarAcceso() {
-      document.getElementById('login-section').style.display = 'none';
-      document.getElementById('admin-panel').style.display = 'block';
-      
-      const datosLocales = localStorage.getItem('propiedades_local');
-      if (datosLocales) {
-        propiedades = JSON.parse(datosLocales);
-      } else {
-        propiedades = [
-          {
-            titulo: "Casa de Prueba Local en Vitacura",
-            precio: "UF 12.500",
-            tipoPrecio: "/ Valor Total",
-            ubicacion: "Vitacura, Santiago",
-            piezas: 4,
-            banos: 3,
-            imagenes: ["images/casa1.jpg"]
-          }
-        ];
-        localStorage.setItem('propiedades_local', JSON.stringify(propiedades));
-      }
-      renderizarPropiedades();
-    }
-
-    // 2. DIBUJAR LAS TARJETAS EN PANTALLA
-    function renderizarPropiedades() {
-      const contenedor = document.getElementById('lista-propiedades');
-      if (propiedades.length === 0) {
-        contenedor.innerHTML = "<p>No hay propiedades guardadas en la memoria local.</p>";
-        return;
-      }
-      
-      contenedor.innerHTML = "";
-      propiedades.forEach((p, idx) => {
-        // Asegurar que si el objeto viejo no tiene tipoPrecio, muestre un fallback
-        const sufijo = p.tipoPrecio ? p.tipoPrecio : "/ Mes";
-        contenedor.innerHTML += `
-          <div class="propiedad-card">
-            <div>
-              <strong style="font-size: 1.1em; color: #111;">${p.titulo}</strong><br>
-              <span style="color: #28a745; font-weight: bold;">${p.precio} ${sufijo}</span><br>
-              <small style="color: #666;">📍 ${p.ubicacion} | 🛏️ ${p.piezas} piezas | 🚿 ${p.banos} baños</small>
-            </div>
-            <div class="acciones">
-              <button onclick="prepararEditar(${idx})" class="btn-edit">✏️ Editar</button>
-              <button onclick="eliminarPropiedad(${idx})" class="btn-delete">❌ Borrar</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    // 3. CAPTURAR EL FORMULARIO (AGREGAR O EDITAR)
-    document.getElementById('propiedad-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const idx = document.getElementById('index-propiedad').value;
-      
-      if (idx === "" && imagenesBase64.length === 0) {
-        alert("Por favor, selecciona al menos una imagen para la propiedad.");
-        return;
-      }
-      
-      const nuevaPropiedad = {
-        titulo: document.getElementById('titulo').value,
-        precio: document.getElementById('precio').value,
-        tipoPrecio: document.getElementById('tipoPrecio').value,
-        ubicacion: document.getElementById('ubicacion').value,
-        piezas: parseInt(document.getElementById('piezas').value),
-        banos: parseInt(document.getElementById('banos').value),
-        imagenes: imagenesBase64.length > 0 ? imagenesBase64 : (idx !== "" ? propiedades[idx].imagenes : [])
-      };
-
-      if (idx === "") {
-        propiedades.push(nuevaPropiedad);
-      } else {
-        propiedades[idx] = nuevaPropiedad;
-      }
-
-      localStorage.setItem('propiedades_local', JSON.stringify(propiedades, null, 2));
-      alert("¡Súper! Cambios guardados temporalmente en tu navegador.");
-      
-      renderizarPropiedades();
-      resetFormulario();
-    });
-
-    // 4. ELIMINAR PROPIEDAD
-    function eliminarPropiedad(idx) {
-      if (confirm(`¿Estás seguro de eliminar "${propiedades[idx].titulo}"?`)) {
-        propiedades.splice(idx, 1);
-        localStorage.setItem('propiedades_local', JSON.stringify(propiedades, null, 2));
-        renderizarPropiedades();
-      }
-    }
-
-    // 5. PASAR DATOS AL FORMULARIO PARA EDITAR
-    function prepararEditar(idx) {
-      const p = propiedades[idx];
-      document.getElementById('index-propiedad').value = idx;
-      document.getElementById('titulo').value = p.titulo;
-      document.getElementById('precio').value = p.precio;
-      document.getElementById('tipoPrecio').value = p.tipoPrecio || "/ Mes";
-      document.getElementById('ubicacion').value = p.ubicacion;
-      document.getElementById('piezas').value = p.piezas;
-      document.getElementById('banos').value = p.banos;
-      
-      const preview = document.getElementById('preview-imagenes');
-      preview.innerHTML = '';
-      imagenesBase64 = [];
-      if (p.imagenes && p.imagenes.length > 0) {
-        p.imagenes.forEach((imgSrc, imgIndex) => {
-          imagenesBase64.push(imgSrc);
-          
-          const imgContainer = document.createElement('div');
-          imgContainer.style.position = 'relative';
-          imgContainer.style.display = 'inline-block';
-          
-          const img = document.createElement('img');
-          img.src = imgSrc;
-          img.style.width = '80px';
-          img.style.height = '80px';
-          img.style.objectFit = 'cover';
-          img.style.borderRadius = '4px';
-          img.style.border = '1px solid #ddd';
-          
-          const deleteBtn = document.createElement('button');
-          deleteBtn.innerHTML = '×';
-          deleteBtn.style.position = 'absolute';
-          deleteBtn.style.top = '-8px';
-          deleteBtn.style.right = '-8px';
-          deleteBtn.style.background = '#6c757d';
-          deleteBtn.style.color = 'white';
-          deleteBtn.style.border = 'none';
-          deleteBtn.style.borderRadius = '50%';
-          deleteBtn.style.width = '20px';
-          deleteBtn.style.height = '20px';
-          deleteBtn.style.cursor = 'pointer';
-          deleteBtn.style.fontSize = '14px';
-          deleteBtn.style.lineHeight = '1';
-          deleteBtn.onclick = function() {
-            const index = imagenesBase64.indexOf(imgSrc);
-            if (index > -1) {
-              imagenesBase64.splice(index, 1);
-            }
-            imgContainer.remove();
-          };
-          
-          imgContainer.appendChild(img);
-          imgContainer.appendChild(deleteBtn);
-          preview.appendChild(imgContainer);
-        });
-      }
-      
-      document.getElementById('form-title').innerText = "✏️ Editando: " + p.titulo;
-      document.getElementById('btn-guardar').innerText = "💾 Actualizar de forma Local";
-      document.getElementById('btn-cancelar').style.display = "inline-block";
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function resetFormulario() {
-      document.getElementById('propiedad-form').reset();
-      document.getElementById('index-propiedad').value = "";
-      document.getElementById('preview-imagenes').innerHTML = '';
-      imagenesBase64 = [];
-      document.getElementById('form-title').innerText = "➕ Añadir Nueva Propiedad";
-      document.getElementById('btn-guardar').innerText = "💾 Guardar Cambios Localmente";
-      document.getElementById('btn-cancelar').style.display = "none";
-    }
-
-    function cerrarSesion() {
-      document.getElementById('admin-panel').style.display = 'none';
-      document.getElementById('login-section').style.display = 'block';
-    }
-  </script>
+  <script src="admin.js?v=3"></script>
+  
 </body>
 </html>
