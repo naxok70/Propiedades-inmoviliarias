@@ -1,7 +1,7 @@
 :root {
     --primary-color: #141b22;
     --secondary-color: #02131f;
-    --accent-color: #a0523d; /* Tono café/terracota elegante */
+    --accent-color: #a0523d; 
 }
 
 body {
@@ -196,7 +196,7 @@ footer p {
 }
 
 .qr-container:hover {
-    transform: scale(1.15); /* Corregido a un zoom más estable (1.15) ya que 1.90 puede salirse del contenedor */
+    transform: scale(1.15); 
     box-shadow: 0 12px 25px rgba(255, 255, 255, 0.25);
 }
 

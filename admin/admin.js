@@ -1,6 +1,4 @@
-// ==========================================
-// VARIABLES GLOBALES Y CONFIGURACIÓN
-// ==========================================
+
 let propiedades = [];
 let archivosFotos = []; 
 let imagenesUrls = [];
@@ -10,9 +8,6 @@ const SUPABASE_ANON_KEY = "sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ==========================================
-// 1. SISTEMA DE SEGURIDAD Y ACCESO (ASÍNCRONO)
-// ==========================================
 
 async function generarHash(texto) {
   const encoder = new TextEncoder();
@@ -22,14 +17,16 @@ async function generarHash(texto) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+
+ //2. SISTEMA DE COMPROBACIÓN DE ACCESO
+
 async function verificarAcceso() {
   const inputClave = document.getElementById('access-key').value;
   const errorMsg = document.getElementById('error-msg');
   
-  const hashIngresado = await generarHash(inputClave);
-  const hashCorrecto = "158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab"; 
+  const claveCorrecta = "Propiedades2022"; 
   
-  if (hashIngresado === hashCorrecto) {
+  if (inputClave === claveCorrecta) {
     if (errorMsg) errorMsg.style.display = 'none';
     
     document.getElementById('login-section').style.display = 'none';
@@ -44,9 +41,9 @@ async function verificarAcceso() {
   }
 }
 
-// ==========================================
-// 2. CONTROL DE EVENTOS CENTRALIZADO
-// ==========================================
+
+// 3. CONTROL DE EVENTOS CENTRALIZADO
+
 document.addEventListener("DOMContentLoaded", function() {
   const btnLogin = document.getElementById('btn-login');
   if (btnLogin) {
@@ -58,6 +55,26 @@ document.addEventListener("DOMContentLoaded", function() {
     accessKeyInput.addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         verificarAcceso();
+      }
+    });
+  }
+
+  // AGREGADO: Lógica interactiva para el Ojito de la Contraseña
+  const btnTogglePassword = document.getElementById('btn-toggle-password');
+  if (btnTogglePassword && accessKeyInput) {
+    btnTogglePassword.addEventListener('click', function() {
+      const ojoIcono = document.getElementById('ojo-icono');
+      
+      if (accessKeyInput.type === 'password') {
+        accessKeyInput.type = 'text';
+        // Cambia el ojo normal por el ojo con una línea (ocultar)
+        ojoIcono.classList.remove('bi-eye');
+        ojoIcono.classList.add('bi-eye-slash');
+      } else {
+        accessKeyInput.type = 'password';
+        // Vuelve al ojo normal
+        ojoIcono.classList.remove('bi-eye-slash');
+        ojoIcono.classList.add('bi-eye');
       }
     });
   }
@@ -108,10 +125,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-// ==========================================
-// 3. LOGICA DE NEGOCIO (CONEXIÓN SUPABASE)
-// ==========================================
-
+// 4. LOGICA DE NEGOCIO (CONEXIÓN SUPABASE)
 async function cargarPropiedades() {
   try {
     const { data, error } = await supabaseClient
@@ -196,7 +210,6 @@ document.getElementById('propiedad-form').addEventListener('submit', async funct
       arrayUrlsFinales = [...imagenesUrls]; 
     }
 
-    // CORRECCIÓN APLICADA: 'of' en vez de 'de'
     if (archivosFotos.length > 0) {
       for (const foto of archivosFotos) {
         const nombreUnico = `${Date.now()}_${foto.name}`;

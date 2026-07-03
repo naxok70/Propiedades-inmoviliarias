@@ -26,7 +26,12 @@
             <h3 class="text-center mb-4">🔑 Panel Administrativo</h3>
             <div class="mb-3">
                 <label for="access-key" class="form-label">Contraseña de Acceso</label>
-                <input type="password" id="access-key" class="form-control" placeholder="Introduce la clave...">
+                <div class="input-group">
+                    <input type="password" id="access-key" class="form-control" placeholder="Introduce la clave...">
+                    <button class="btn btn-outline-secondary" type="button" id="btn-toggle-password" title="Mostrar/Ocultar contraseña">
+                        <i class="bi bi-eye" id="ojo-icono"></i>
+                    </button>
+                </div>
                 <div id="error-msg" class="text-danger small mt-2" style="display: none;">Clave incorrecta. Inténtalo de nuevo.</div>
             </div>
             <button id="btn-login" class="btn btn-primary w-100">Ingresar</button>
