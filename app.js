@@ -1,7 +1,16 @@
-// Variable para almacenar las propiedades cargadas desde JSON
+// ==========================================
+// CONFIGURACIÓN DE SUPABASE
+// ==========================================
+// RECUERDA: Coloca tu URL real de Supabase aquí
+const SUPABASE_URL = "https://tu-url-de-supabase.supabase.co"; 
+const SUPABASE_ANON_KEY = "sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6"; 
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Variable para almacenar las propiedades cargadas desde SUPABASE
 let propiedades = [];
 
-// Función para formatear precio en pesos chilenos
+// Función para fomentar precio en pesos chilenos
 function formatearPrecio(precio) {
     return new Intl.NumberFormat('es-CL', {
         style: 'currency',
@@ -25,8 +34,8 @@ function renderizarPropiedades() {
         const card = document.createElement('div');
         card.className = 'card property-card';
         
-        // Obtener imágenes: usar arreglo imagenes o fallback a imagen individual
-        const imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : [propiedad.imagen || 'images/casa1.jpg'];
+        // Obtener imágenes desde el array de Supabase o usar fallback
+        const imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : ['images/casa1.jpg'];
         const primeraImagen = imagenes[0];
         
         const cardId = `propiedad-${idx}`;
@@ -72,24 +81,17 @@ function renderizarPropiedades() {
     });
 }
 
-// Función global para cambiar imágenes en el carrusel
+// Función global para cambiar imágenes en el carrusel (Adaptada para Supabase)
 function cambiarImagen(cardId, direction) {
     const idx = parseInt(cardId.replace('propiedad-', ''));
     const imgElement = document.getElementById(`img-${idx}`);
     const counterElement = document.getElementById(`counter-${idx}`);
     
-    // Obtener las imágenes del array global o localStorage
     let imagenes;
-    const datosLocales = localStorage.getItem('propiedades_local');
     
-    if (datosLocales) {
-        const propiedades = JSON.parse(datosLocales);
-        const propiedad = propiedades[idx];
-        if (propiedad) {
-            imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : [propiedad.imagen || 'images/casa1.jpg'];
-        }
-    } else if (propiedades[idx]) {
-        imagenes = (propiedades[idx].imagenes && propiedades[idx].imagenes.length > 0) ? propiedades[idx].imagenes : [propiedades[idx].imagen || 'images/casa1.jpg'];
+    // Leemos directamente del arreglo en memoria sincronizado de Supabase
+    if (propiedades[idx]) {
+        imagenes = (propiedades[idx].imagenes && propiedades[idx].imagenes.length > 0) ? propiedades[idx].imagenes : ['images/casa1.jpg'];
     }
     
     if (imagenes && imagenes.length > 0) {
@@ -118,27 +120,36 @@ function abrirLightbox(imagenes, startIndex = 0) {
     }
 }
 
-// Busca esta función en tu app.js y reemplázala completa:
+// CARGA LOS DATOS EN TIEMPO REAL DESDE SUPABASE
 async function cargarPropiedades() {
     try {
-        // 1. Primero miramos si el administrador guardó algo de forma local
-        const datosLocales = localStorage.getItem('propiedades_local');
+        console.log("Sincronizando: Conectando a Supabase Cloud...");
         
-        if (datosLocales) {
-            console.log("Sincronizado: Cargando datos desde el Panel Admin Local");
-            propiedades = JSON.parse(datosLocales);
-            renderizarPropiedades();
-        } else {
-            // 2. Si el panel está vacío, cargamos el JSON por defecto de tu computadora
-            console.log("Cargando archivo JSON por defecto");
-            const respuesta = await fetch('data/propiedades.json');
-            propiedades = await respuesta.json();
-            renderizarPropiedades();
-        }
+        const { data, error } = await supabase
+            .from('proyecto') // El nombre de la tabla en tu Supabase
+            .select('*')
+            .order('id', { ascending: false }); // Trae los registros más nuevos arriba
+
+        if (error) throw error;
+
+        // Mapeamos lo que llega de la BD de internet al formato de tu array
+        propiedades = data.map(p => ({
+            titulo: p.nombre,
+            precio: p.precio || "0",
+            tipoPrecio: p.tipo_precio || "/ Valor Total",
+            ubicacion: p.ubicacion || "",
+            piezas: p.piezas || 0,
+            banos: p.banos || 0,
+            imagenes: p.foto_url ? [p.foto_url] : [] // Lo inyectamos en formato array
+        }));
+
+        // Dibujamos las propiedades reales ya descargadas
+        renderizarPropiedades();
+
     } catch (error) {
-        console.error("Error al comunicar los archivos locales:", error);
+        console.error("Error al comunicar con la base de datos de Supabase:", error);
     }
 }
 
-// Asegúrate de que la función se esté ejecutando al cargar la página
+// Ejecución al cargar la página de clientes
 document.addEventListener('DOMContentLoaded', cargarPropiedades);

@@ -14,7 +14,7 @@
       <h2>🔒 Acceso al Panel Inmobiliaria</h2>
       <p>Ingresa la contraseña de administrador para gestionar las propiedades.</p>
       <input type="password" id="access-key" placeholder="Escribe la contraseña aquí...">
-      <button onclick="verificarAcceso()">Ingresar al Panel</button>
+<button id="btn-login" onclick="verificarAcceso()">Ingresar al Panel</button>
       <div id="error-msg">Contraseña incorrecta. Inténtalo de nuevo.</div>
     </div>
   </div>
@@ -84,6 +84,6 @@
   <div id="toast-container"></div>
 
   <script src="admin.js?v=3"></script>
-  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>
