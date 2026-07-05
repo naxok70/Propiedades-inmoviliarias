@@ -1,6 +1,4 @@
-// ==========================================
-// CONFIGURACIÓN DE SUPABASE - VISTA PÚBLICA
-// ==========================================
+// CONFIGURACIÓN DE SUPABASE 
 const SUPABASE_URL = "https://delswnqvmrupvobalqyr.supabase.co"; 
 const SUPABASE_ANON_KEY = "sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6"; 
 
@@ -48,9 +46,24 @@ function renderizarPropiedades() {
         const counterId = `counter-${idx}`;
         const sufijo = propiedad.tipoPrecio ? propiedad.tipoPrecio : "/ Valor Total";
         
-        // CORRECCIÓN: Armamos el mensaje automático para WhatsApp codificando el texto para URLs
-        const numeroTelefono = "56985519073"; // El número principal de contacto
-        const textoMensaje = `Hola, me interesa la propiedad publicada: "${propiedad.titulo}" con un valor de ${formatearPrecio(propiedad.precio)} ${sufijo}. Me gustaría recibir más información.`;
+        // Operación dinámica (Venta / Arriendo)
+        const badgeOperacion = propiedad.tipoOperacion === 'Arriendo' ? 
+            `<span class="badge bg-warning text-dark me-1"><i class="bi bi-key-fill me-1"></i>Arriendo</span>` : 
+            `<span class="badge bg-success text-white me-1"><i class="bi bi-cash-coin me-1"></i>Venta</span>`;
+
+        // Renderizado dinámico de Gastos Comunes
+        const htmlGastosComunes = (propiedad.gastosComunes && propiedad.gastosComunes > 0) ? 
+            `<div class="text-muted small mb-2"><i class="bi bi-receipt me-1"></i>GGCC: <strong>${formatearPrecio(propiedad.gastosComunes)}</strong></div>` : '';
+
+        // Botón dinámico para el video/tour virtual de YouTube
+        const htmlBotonVideo = propiedad.videoUrl ? 
+            `<a href="${propiedad.videoUrl}" target="_blank" class="btn btn-outline-danger btn-sm w-100 mb-2 mt-auto d-flex align-items-center justify-content-center">
+                <i class="bi bi-youtube me-2"></i>Ver Video / Tour Virtual
+             </a>` : '';
+        
+        // ARMADO DEL MENSAJE AUTOMÁTICO DE WHATSAPP
+        const numeroTelefono = "56985519073"; 
+        const textoMensaje = `Hola, me interesa la propiedad ("${propiedad.tipoOperacion}") publicada: "${propiedad.titulo}" con un valor de ${formatearPrecio(propiedad.precio)} ${sufijo}. Me gustaría recibir más información.`;
         const urlWhatsapp = `https://wa.me/${numeroTelefono}?text=${encodeURIComponent(textoMensaje)}`;
         
         card.innerHTML = `
@@ -64,29 +77,38 @@ function renderizarPropiedades() {
                 <div id="${counterId}" class="image-counter" style="display: ${imagenes.length > 1 ? 'block' : 'none'}">1/${imagenes.length}</div>
             </div>
             <div class="card-body d-flex flex-column">
-                <div>
-                    <span class="badge bg-secondary mb-2">${propiedad.categoria}</span>
+                <div class="mb-2">
+                    ${badgeOperacion}
+                    <span class="badge bg-secondary">${propiedad.categoria}</span>
                 </div>
                 <h5 class="card-title fw-bold" style="color: #111;">${propiedad.titulo}</h5>
                 <p class="price text-success fw-bold fs-5 mb-2">${formatearPrecio(propiedad.precio)} <span style="font-size: 0.7em; color: #666; font-weight: normal;">${sufijo}</span></p>
-                <div class="features mb-2 d-flex gap-3 text-muted small">
-                    <span class="feature">
-                        <i class="bi bi-door-open-fill me-1"></i>
-                        ${propiedad.piezas} ${propiedad.piezas === 1 ? 'pieza' : 'piezas'}
+                
+                <div class="features mb-2 d-flex gap-2 flex-wrap text-muted small">
+                    <span class="feature me-2">
+                        <i class="bi bi-door-open-fill me-1"></i>${propiedad.piezas} ${propiedad.piezas === 1 ? 'dorm.' : 'dorm.'}
+                    </span>
+                    <span class="feature me-2">
+                        <i class="bi bi-droplet-fill me-1"></i>${propiedad.banos} ${propiedad.banos === 1 ? 'baño' : 'baños'}
+                    </span>
+                    <span class="feature me-2">
+                        <i class="bi bi-p-circle-fill me-1"></i>${propiedad.estacionamiento} estac.
                     </span>
                     <span class="feature">
-                        <i class="bi bi-droplet-fill me-1"></i>
-                        ${propiedad.banos} ${propiedad.banos === 1 ? 'baño' : 'baños'}
+                        <i class="bi bi-box-seam-fill me-1"></i>${propiedad.bodega} bod.
                     </span>
                 </div>
+
+                ${htmlGastosComunes}
+
                 <p class="location text-muted small mb-3 mt-auto">
-                    <i class="bi bi-geo-alt-fill me-1 text-danger"></i>
-                    ${propiedad.ubicacion}
+                    <i class="bi bi-geo-alt-fill me-1 text-danger"></i>${propiedad.ubicacion}
                 </p>
                 
-                <a href="${urlWhatsapp}" target="_blank" class="btn btn-primary btn-contact w-100 mt-2 d-flex align-items-center justify-content-center" style="text-decoration: none;">
-                    <i class="bi bi-whatsapp me-2"></i>
-                    Contactar 
+                ${htmlBotonVideo}
+
+                <a href="${urlWhatsapp}" target="_blank" class="btn btn-primary btn-contact w-100 d-flex align-items-center justify-content-center" style="text-decoration: none;">
+                    <i class="bi bi-whatsapp me-2"></i>Contactar 
                 </a>
             </div>
         `;
@@ -111,7 +133,7 @@ function cambiarImagen(cardId, direction) {
         let currentIndex = parseInt(imgElement.dataset.currentIndex || 0);
         currentIndex += direction;
         if (currentIndex < 0) {
-            currentIndex = imagery.length - 1;
+            currentIndex = imagenes.length - 1;
         } else if (currentIndex >= imagenes.length) {
             currentIndex = 0;
         }
@@ -158,7 +180,13 @@ async function cargarPropiedades() {
                 ubicacion: p.ubicacion || "",
                 piezas: p.piezas || 0,
                 banos: p.banos || 0,
-                imagenes: urlsArray 
+                imagenes: urlsArray,
+                // NUEVOS CAMPOS OBTENIDOS DESDE SUPABASE DE MANERA COHERENTE:
+                tipoOperacion: p.tipo_operacion || "Venta",
+                gastosComunes: p.gastos_comunes || 0,
+                estacionamiento: p.estacionamiento || 0,
+                bodega: p.bodega || 0,
+                videoUrl: p.video_url || ""
             };
         });
 

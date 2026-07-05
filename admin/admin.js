@@ -1,4 +1,3 @@
-
 let propiedades = [];
 let archivosFotos = []; 
 let imagenesUrls = [];
@@ -8,7 +7,6 @@ const SUPABASE_ANON_KEY = "sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-
 async function generarHash(texto) {
   const encoder = new TextEncoder();
   const data = encoder.encode(texto);
@@ -17,9 +15,7 @@ async function generarHash(texto) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-
- //2. SISTEMA DE COMPROBACIÓN DE ACCESO
-
+// 2. SISTEMA DE COMPROBACIÓN DE ACCESO
 async function verificarAcceso() {
   const inputClave = document.getElementById('access-key').value;
   const errorMsg = document.getElementById('error-msg');
@@ -41,9 +37,7 @@ async function verificarAcceso() {
   }
 }
 
-
 // 3. CONTROL DE EVENTOS CENTRALIZADO
-
 document.addEventListener("DOMContentLoaded", function() {
   const btnLogin = document.getElementById('btn-login');
   if (btnLogin) {
@@ -59,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // AGREGADO: Lógica interactiva para el Ojito de la Contraseña
   const btnTogglePassword = document.getElementById('btn-toggle-password');
   if (btnTogglePassword && accessKeyInput) {
     btnTogglePassword.addEventListener('click', function() {
@@ -67,12 +60,10 @@ document.addEventListener("DOMContentLoaded", function() {
       
       if (accessKeyInput.type === 'password') {
         accessKeyInput.type = 'text';
-        // Cambia el ojo normal por el ojo con una línea (ocultar)
         ojoIcono.classList.remove('bi-eye');
         ojoIcono.classList.add('bi-eye-slash');
       } else {
         accessKeyInput.type = 'password';
-        // Vuelve al ojo normal
         ojoIcono.classList.remove('bi-eye-slash');
         ojoIcono.classList.add('bi-eye');
       }
@@ -150,7 +141,13 @@ async function cargarPropiedades() {
         ubicacion: p.ubicacion || "",
         piezas: p.piezas || 0,
         banos: p.banos || 0,
-        imagenes: urlsArray
+        imagenes: urlsArray,
+        // NUEVOS CAMPOS RECUPERADOS DESDE SUPABASE:
+        tipoOperacion: p.tipo_operacion || "Venta",
+        gastosComunes: p.gastos_comunes || 0,
+        estacionamiento: p.estacionamiento || 0,
+        bodega: p.bodega || 0,
+        videoUrl: p.video_url || ""
       };
     });
 
@@ -173,13 +170,20 @@ function renderizarPropiedades() {
   contenedor.innerHTML = "";
   propiedades.forEach((p, idx) => {
     const sufijo = p.tipoPrecio ? p.tipoPrecio : "/ Total";
+    const badgeOp = p.tipoOperacion === "Arriendo" ? '🔑 Arriendo' : '💰 Venta';
+    
     contenedor.innerHTML += `
       <div class="propiedad-card">
         <div>
           <strong style="font-size: 1.1em; color: #111;">${p.titulo}</strong> 
-          <span style="font-size: 0.85em; background: #e0e0e0; color: #333; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">${p.categoria}</span><br>
-          <span style="color: #28a745; font-weight: bold;">$${p.precio} ${sufijo}</span><br>
-          <small style="color: #666;">📍 ${p.ubicacion} | 🛏️ ${p.piezas} piezas | 🚿 ${p.banos} baños | 📸 ${p.imagenes.length} fotos</small>
+          <span style="font-size: 0.85em; background: #e0e0e0; color: #333; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">${p.categoria}</span>
+          <span style="font-size: 0.85em; background: #d4edda; color: #155724; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: 500;">${badgeOp}</span><br>
+          <span style="color: #28a745; font-weight: bold;">$${parseInt(p.precio).toLocaleString('es-CL')} ${sufijo}</span><br>
+          <small style="color: #666;">
+            📍 ${p.ubicacion} | 🛏️ ${p.piezas} dorm | 🚿 ${p.banos} baños | 🚗 ${p.estacionamiento} estac. | 📦 ${p.bodega} bodega
+            ${p.gastosComunes > 0 ? `| 💸 GGCC: $${parseInt(p.gastosComunes).toLocaleString('es-CL')}` : ''}
+            ${p.videoUrl ? `| 🎥 Tiene Video` : ''}
+          </small>
         </div>
         <div class="acciones">
           <button onclick="prepararEditar(${idx})" class="btn-edit">✏️ Editar</button>
@@ -235,7 +239,13 @@ document.getElementById('propiedad-form').addEventListener('submit', async funct
       ubicacion: document.getElementById('ubicacion').value,
       piezas: parseInt(document.getElementById('piezas').value) || 0,
       banos: parseInt(document.getElementById('banos').value) || 0,
-      foto_url: stringFotosFinal
+      foto_url: stringFotosFinal,
+      // NUEVOS CAMPOS MAPEADOS HACIA LA TABLA EN LA NUBE:
+      tipo_operacion: document.getElementById('tipoOperacion').value,
+      gastos_comunes: parseInt(document.getElementById('gastosComunes').value) || 0,
+      estacionamiento: parseInt(document.getElementById('estacionamiento').value) || 0,
+      bodega: parseInt(document.getElementById('bodega').value) || 0,
+      video_url: document.getElementById('videoUrl').value
     };
 
     if (idx === "") {
@@ -298,6 +308,13 @@ function prepararEditar(idx) {
   document.getElementById('piezas').value = p.piezas;
   document.getElementById('banos').value = p.banos;
   
+  // NUEVO EN EDICIÓN:
+  document.getElementById('tipoOperacion').value = p.tipoOperacion || "Venta";
+  document.getElementById('gastosComunes').value = p.gastosComunes || 0;
+  document.getElementById('estacionamiento').value = p.estacionamiento || 0;
+  document.getElementById('bodega').value = p.bodega || 0;
+  document.getElementById('videoUrl').value = p.videoUrl || "";
+  
   const preview = document.getElementById('preview-imagenes');
   preview.innerHTML = '';
   archivosFotos = [];
@@ -341,6 +358,7 @@ function resetFormulario() {
   document.getElementById('propiedad-form').reset();
   document.getElementById('index-propiedad').value = "";
   document.getElementById('categoria').value = "";
+  document.getElementById('tipoOperacion').value = "Venta";
   const preview = document.getElementById('preview-imagenes');
   if (preview) preview.innerHTML = '';
   archivosFotos = [];

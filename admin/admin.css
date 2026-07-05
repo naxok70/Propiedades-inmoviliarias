@@ -16,7 +16,7 @@ body {
     background-color: var(--background, #ffffff);
 }
 
-/* Corregimos selectores reactivos para que el login-wrapper dependa del display real */
+
 #login-wrapper:has(#login-section[style*="display: none"]) {
     display: none !important;
 }
