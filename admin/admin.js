@@ -204,6 +204,15 @@ document.getElementById('propiedad-form').addEventListener('submit', async funct
     return;
   }
 
+  // Verificar uso del storage antes de subir imágenes
+  if (archivosFotos.length > 0) {
+    const usoStorage = await verificarUsoStorage();
+    if (usoStorage && usoStorage.estaCercaLimite) {
+      alert(`⚠️ CUIDADO: El uso de almacenamiento está cerca del límite (${usoStorage.porcentajeUso}% de ${usoStorage.limiteGB}GB).\n\nUso actual: ${usoStorage.usoGB}GB\n\nPor favor, elimina algunas propiedades con sus imágenes para liberar espacio o actualiza tu plan de Supabase.`);
+      return; // Bloquear la subida
+    }
+  }
+
   btnGuardar.innerText = "⏳ Subiendo imágenes...";
   btnGuardar.disabled = true;
   
@@ -278,10 +287,85 @@ document.getElementById('propiedad-form').addEventListener('submit', async funct
   }
 });
 
+// Función para extraer nombres de archivo de URLs de Supabase Storage
+function extraerNombresArchivos(urls) {
+  let urlsArray = [];
+  if (typeof urls === 'string') {
+    urlsArray = urls.split(',').map(url => url.trim()).filter(url => url !== "");
+  } else if (Array.isArray(urls)) {
+    urlsArray = urls;
+  }
+  
+  return urlsArray.map(url => {
+    // Extraer el nombre del archivo de la URL de Supabase Storage
+    // Formato: https://[project].supabase.co/storage/v1/object/public/[bucket]/[filename]
+    const match = url.match(/\/([^\/]+)$/);
+    return match ? match[1] : null;
+  }).filter(filename => filename !== null);
+}
+
+// Función para verificar el uso del storage de Supabase
+async function verificarUsoStorage() {
+  try {
+    // Obtener información del storage (método para listar archivos en el bucket)
+    const { data, error } = await supabaseClient
+      .storage
+      .from('fotos')
+      .list('', { limit: 1000 });
+    
+    if (error) throw error;
+    
+    // Calcular el tamaño total en bytes
+    let totalBytes = 0;
+    if (data && data.length > 0) {
+      data.forEach(file => {
+        if (file.metadata && file.metadata.size) {
+          totalBytes += file.metadata.size;
+        }
+      });
+    }
+    
+    // El plan gratuito de Supabase tiene 1GB = 1073741824 bytes
+    const limiteGB = 1;
+    const limiteBytes = limiteGB * 1073741824;
+    const usoGB = totalBytes / 1073741824;
+    const porcentajeUso = (usoGB / limiteGB) * 100;
+    
+    return {
+      totalBytes,
+      usoGB: usoGB.toFixed(2),
+      porcentajeUso: porcentajeUso.toFixed(1),
+      limiteGB,
+      estaCercaLimite: porcentajeUso >= 80
+    };
+  } catch (error) {
+    console.error("Error al verificar uso del storage:", error);
+    return null;
+  }
+}
+
 async function eliminarPropiedad(idx) {
   const target = propiedades[idx];
   if (confirm(`¿Estás seguro de eliminar permanentemente "${target.titulo}"?`)) {
     try {
+      // Primero, obtener las URLs de las fotos para eliminar del storage
+      const urlsAEliminar = target.imagenes || [];
+      const nombresArchivos = extraerNombresArchivos(urlsAEliminar);
+      
+      // Eliminar archivos del storage si existen
+      if (nombresArchivos.length > 0) {
+        const { error: storageError } = await supabaseClient
+          .storage
+          .from('fotos')
+          .remove(nombresArchivos);
+        
+        if (storageError) {
+          console.warn("Error al eliminar archivos del storage:", storageError);
+          // Continuamos con la eliminación de la fila aunque falle el storage
+        }
+      }
+      
+      // Luego eliminar la fila de la tabla Proyecto
       const { error } = await supabaseClient
         .from('Proyecto')
         .delete()
