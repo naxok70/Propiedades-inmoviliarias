@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Credenciales de tu proyecto
-const supabaseUrl = 'https://atlygcbaqnmdjqwqtgyz.supabase.co';
-const supabaseKey = 'sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6';
+const supabaseUrl = 'https://delswnqvmrupvobalqyr.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlbHN3bnF2bXJ1cHZvYmFscXlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMzg5NzMsImV4cCI6MjA5ODYxNDk3M30.LTgf6A8x030EzRDOvveEpQDFzIXIl0O6hPsdNUjAWsc';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function limpiarFotosHuérfanas() {
