@@ -3,7 +3,7 @@ let archivosFotos = [];
 let imagenesUrls = [];
 
 const SUPABASE_URL = "https://atlygcbaqnmdjqwqtgyz.supabase.co"; 
-const SUPABASE_ANON_KEY = "sb_publishable_FJmNPmJ1jtHUouBpuZEqMA_gIDpzPbS"; 
+const SUPABASE_ANON_KEY = "sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6"; 
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -13,6 +13,54 @@ async function generarHash(texto) {
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Función para optimizar imágenes antes de subirlas
+async function optimizarImagen(file, maxWidth = 1200, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Redimensionar si es necesario
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Comprimir como JPEG con calidad especificada
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const optimizedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              });
+              resolve(optimizedFile);
+            } else {
+              reject(new Error('Error al comprimir imagen'));
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Error al cargar imagen'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Error al leer archivo'));
+    reader.readAsDataURL(file);
+  });
 }
 
 // 2. SISTEMA DE COMPROBACIÓN DE ACCESO
@@ -225,16 +273,25 @@ document.getElementById('propiedad-form').addEventListener('submit', async funct
 
     if (archivosFotos.length > 0) {
       for (const foto of archivosFotos) {
-        const nombreUnico = `${Date.now()}_${foto.name}`;
-        const { data: storageData, error: storageError } = await supabaseClient
-          .storage
-          .from('fotos')
-          .upload(nombreUnico, foto);
+        try {
+          // Optimizar imagen antes de subir
+          const fotoOptimizada = await optimizarImagen(foto, 1200, 0.8);
+          console.log(`Imagen optimizada: ${foto.name} -> ${fotoOptimizada.name} (${(fotoOptimizada.size / 1024).toFixed(2)} KB)`);
 
-        if (storageError) throw storageError;
+          const nombreUnico = `${Date.now()}_${fotoOptimizada.name}`;
+          const { data: storageData, error: storageError } = await supabaseClient
+            .storage
+            .from('fotos')
+            .upload(nombreUnico, fotoOptimizada);
 
-        const { data: urlData } = supabaseClient.storage.from('fotos').getPublicUrl(nombreUnico);
-        arrayUrlsFinales.push(urlData.publicUrl);
+          if (storageError) throw storageError;
+
+          const { data: urlData } = supabaseClient.storage.from('fotos').getPublicUrl(nombreUnico);
+          arrayUrlsFinales.push(urlData.publicUrl);
+        } catch (error) {
+          console.error(`Error al optimizar/subir ${foto.name}:`, error);
+          throw error;
+        }
       }
     }
 

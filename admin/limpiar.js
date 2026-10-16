@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Credenciales de tu proyecto
-const supabaseUrl = 'https://delswnqvmrupvobalqyr.supabase.co';
+const supabaseUrl = 'https://atlygcbaqnmdjqwqtgyz.supabase.co';
 const supabaseKey = 'sb_publishable_B4fMCrV7KPvfzy22uqKVWg_57X66nK6';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
