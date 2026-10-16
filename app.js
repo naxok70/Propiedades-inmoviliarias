@@ -4,8 +4,10 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let propiedades = [];            
-let todasLasPropiedades = [];     
+let propiedades = [];
+let todasLasPropiedades = [];
+let paginaActual = 1;
+const propiedadesPorPagina = 10;     
 
 function formatearPrecio(precio) {
     const num = parseInt(String(precio).replace(/\./g, '')) || 0;
@@ -21,7 +23,13 @@ function renderizarPropiedades() {
     const contenedor = document.getElementById('contenedor-propiedades');
     if (!contenedor) return;
     contenedor.innerHTML = '';
-    
+
+    // Calcular paginación
+    const totalPaginas = Math.ceil(propiedades.length / propiedadesPorPagina);
+    const inicio = (paginaActual - 1) * propiedadesPorPagina;
+    const fin = inicio + propiedadesPorPagina;
+    const propiedadesPagina = propiedades.slice(inicio, fin);
+
     if (propiedades.length === 0) {
         contenedor.innerHTML = `
             <div class="col-12 text-center text-muted p-5">
@@ -30,20 +38,21 @@ function renderizarPropiedades() {
             </div>`;
         return;
     }
-    
-    propiedades.forEach((propiedad, idx) => {
+
+    let idxGlobal = inicio;
+    propiedadesPagina.forEach((propiedad, idx) => {
         const col = document.createElement('div');
         col.className = 'col-12 col-sm-6 col-md-4 col-lg-4';
-        
+
         const card = document.createElement('div');
         card.className = 'card property-card h-100 shadow-sm border-0';
-        
+
         const imagenes = (propiedad.imagenes && propiedad.imagenes.length > 0) ? propiedad.imagenes : ['imagenes/casa1.jpg'];
         const primeraImagen = imagenes[0];
-        
-        const cardId = `propiedad-${idx}`;
-        const imgId = `img-${idx}`;
-        const counterId = `counter-${idx}`;
+
+        const cardId = `propiedad-${idxGlobal}`;
+        const imgId = `img-${idxGlobal}`;
+        const counterId = `counter-${idxGlobal}`;
         const sufijo = propiedad.tipoPrecio ? propiedad.tipoPrecio : "/ Valor Total";
         
         // Operación dinámica (Venta / Arriendo)
@@ -116,7 +125,39 @@ function renderizarPropiedades() {
         card.dataset.imagenes = JSON.stringify(imagenes);
         col.appendChild(card);
         contenedor.appendChild(col);
+        idxGlobal++;
     });
+
+    // Renderizar controles de paginación
+    if (totalPaginas > 1) {
+        const paginacionDiv = document.createElement('div');
+        paginacionDiv.className = 'col-12 mt-4';
+        paginacionDiv.innerHTML = `
+            <nav aria-label="Navegación de páginas">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item ${paginaActual === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="cambiarPagina(${paginaActual - 1}); return false;">
+                            <i class="bi bi-chevron-left"></i> Anterior
+                        </a>
+                    </li>
+                    ${Array.from({length: totalPaginas}, (_, i) => i + 1).map(num => `
+                        <li class="page-item ${num === paginaActual ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="cambiarPagina(${num}); return false;">${num}</a>
+                        </li>
+                    `).join('')}
+                    <li class="page-item ${paginaActual === totalPaginas ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="cambiarPagina(${paginaActual + 1}); return false;">
+                            Siguiente <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="text-center text-muted small mt-2">
+                Mostrando ${inicio + 1}-${Math.min(fin, propiedades.length)} de ${propiedades.length} propiedades
+            </div>
+        `;
+        contenedor.appendChild(paginacionDiv);
+    }
 }
 
 function cambiarImagen(cardId, direction) {
@@ -147,11 +188,20 @@ function cambiarImagen(cardId, direction) {
 function ampliarImagen(urlImagen) {
     const imagenGrande = document.getElementById('imagenGrandeVisor');
     const modalElement = document.getElementById('visorImagenModal');
-    
+
     if (imagenGrande && modalElement) {
         imagenGrande.src = urlImagen;
         const miVisorModal = new bootstrap.Modal(modalElement);
         miVisorModal.show();
+    }
+}
+
+function cambiarPagina(numPagina) {
+    const totalPaginas = Math.ceil(propiedades.length / propiedadesPorPagina);
+    if (numPagina >= 1 && numPagina <= totalPaginas) {
+        paginaActual = numPagina;
+        renderizarPropiedades();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
@@ -201,7 +251,7 @@ async function cargarPropiedades() {
 function filtrarCategoria(catSeleccionada) {
     const botones = document.querySelectorAll('.filter-btn');
     botones.forEach(btn => btn.classList.remove('active'));
-    
+
     if (window.event && window.event.target) {
         window.event.target.classList.add('active');
     }
@@ -211,13 +261,15 @@ function filtrarCategoria(catSeleccionada) {
     } else {
         propiedades = todasLasPropiedades.filter(p => p.categoria === catSeleccionada);
     }
-    
+
+    paginaActual = 1; // Resetear a página 1 al filtrar
     renderizarPropiedades();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarPropiedades();
     window.filtrarCategoria = filtrarCategoria;
-    window.cambiarImagen = cambiarImagen; 
-    window.ampliarImagen = ampliarImagen; 
+    window.cambiarImagen = cambiarImagen;
+    window.ampliarImagen = ampliarImagen;
+    window.cambiarPagina = cambiarPagina;
 });
