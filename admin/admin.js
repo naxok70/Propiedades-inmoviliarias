@@ -382,8 +382,8 @@ async function verificarUsoStorage() {
       });
     }
     
-    // El plan gratuito de Supabase tiene 1GB = 1073741824 bytes
-    const limiteGB = 1;
+    // El plan tiene 500MB = 0.5GB = 536870912 bytes
+    const limiteGB = 0.5;
     const limiteBytes = limiteGB * 1073741824;
     const usoGB = totalBytes / 1073741824;
     const porcentajeUso = (usoGB / limiteGB) * 100;
