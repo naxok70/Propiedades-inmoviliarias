@@ -223,6 +223,246 @@ footer p {
     opacity: 0.9;
 }
 
+/* Botón desplegable de filtros */
+.btn-filtro {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.35rem;
+    border-radius: 999px;
+    border: 1.5px solid rgba(160, 82, 61, 0.15);
+    background-color: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--secondary-color);
+    font-weight: 600;
+    font-size: 0.92rem;
+    box-shadow: 0 4px 14px rgba(2, 19, 31, 0.05);
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-filtro:hover,
+.btn-filtro:focus {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: 0 6px 18px rgba(160, 82, 61, 0.15);
+}
+
+.btn-filtro.abierto {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(160, 82, 61, 0.25);
+}
+
+.filtro-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    margin-left: 0.5rem;
+    border-radius: 999px;
+    background-color: var(--accent-color);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.btn-filtro.abierto .filtro-badge {
+    background-color: #ffffff;
+    color: var(--accent-color);
+}
+
+.filtro-chevron {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-filtro.abierto .filtro-chevron {
+    transform: rotate(180deg);
+}
+
+/* Animación de despliegue del panel */
+.panel-filtros {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+}
+
+.panel-filtros.abierto {
+    grid-template-rows: 1fr;
+}
+
+.panel-filtros-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* Filtros de región y ciudad */
+.filtros-ubicacion {
+    position: relative;
+    background: rgba(255, 255, 255, 0.38);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(160, 82, 61, 0.1);
+    border-radius: 20px;
+    padding: 1.4rem 1.6rem 1.6rem;
+    box-shadow: 0 8px 24px rgba(2, 19, 31, 0.04);
+    overflow: hidden;
+}
+
+/* Barra superior con los colores de la marca */
+.filtros-ubicacion::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(160, 82, 61, 0.7) 0%, rgba(107, 180, 185, 0.7) 100%);
+}
+
+.filtros-ubicacion > * {
+    position: relative;
+    z-index: 1;
+}
+
+.filtros-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.15rem;
+}
+
+.filtros-icon {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(160, 82, 61, 0.14) 0%, rgba(107, 180, 185, 0.2) 100%);
+    color: var(--accent-color);
+    font-size: 1.3rem;
+    box-shadow: inset 0 0 0 1px rgba(160, 82, 61, 0.08);
+}
+
+.filtros-titulo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.2;
+    color: var(--secondary-color);
+    margin: 0;
+}
+
+.filtros-subtitulo {
+    font-size: 0.85rem;
+    color: #718096;
+    margin: 0.1rem 0 0;
+}
+
+.filtros-ubicacion .form-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #8a6a5f;
+    margin-bottom: 0.4rem;
+}
+
+.filtros-ubicacion .form-label i {
+    color: var(--accent-color);
+}
+
+.filtro-select-wrapper {
+    position: relative;
+}
+
+.filtro-select-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-color);
+    font-size: 1rem;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.85;
+}
+
+.filtros-ubicacion .form-select {
+    height: 50px;
+    padding-left: 2.75rem;
+    padding-right: 2.6rem;
+    border-radius: 12px;
+    border: 1.5px solid rgba(160, 82, 61, 0.15);
+    background-color: rgba(255, 255, 255, 0.72);
+    color: var(--secondary-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: none;
+    cursor: pointer;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.filtros-ubicacion .form-select:hover {
+    border-color: rgba(160, 82, 61, 0.45);
+}
+
+.filtros-ubicacion .form-select:focus {
+    border-color: var(--accent-color);
+    background-color: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 0 0 4px rgba(160, 82, 61, 0.12);
+}
+
+.btn-limpiar-filtros {
+    width: 100%;
+    height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 1.5px solid rgba(160, 82, 61, 0.15);
+    background-color: rgba(255, 255, 255, 0.55);
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+}
+
+.btn-limpiar-filtros:hover,
+.btn-limpiar-filtros:focus {
+    border-color: var(--accent-color);
+    background-color: rgba(160, 82, 61, 0.06);
+    color: var(--accent-color);
+}
+
+.btn-limpiar-filtros:active {
+    transform: translateY(1px);
+}
+
+@media (max-width: 768px) {
+    .filtros-ubicacion {
+        padding: 1.2rem 1.1rem 1.35rem;
+        border-radius: 16px;
+    }
+
+    .filtros-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1.15rem;
+    }
+
+    .filtros-titulo {
+        font-size: 1.15rem;
+    }
+}
+
 /* Carrusel de imágenes en tarjeta */
 .image-carousel {
     position: relative;

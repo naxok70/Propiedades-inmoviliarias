@@ -46,8 +46,8 @@
 
     <section class="hero-section">
         <div class="container">
-            <h1>Encuentra tu hogar ideal</h1>
-            <p>Casas, departamentos y terrenos con las mejores conditions</p>
+            <h1>Tu Próximo Hogar E Inversión Te Espera</h1>
+            <p>Explora nuestras propiedades que tenemos en ventas o arriendos</p>
         </div>
     </section>
 
@@ -59,12 +59,71 @@
             </div>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-12 d-flex justify-content-center gap-2 flex-wrap">
-                <button class="btn btn-outline-dark active filter-btn" onclick="filtrarCategoria('Todos')">✨ Todos</button>
-                <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Casa')">🏡 Casas</button>
-                <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Departamento')">🏢 Departamentos</button>
-                <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Terreno')">🌱 Terrenos</button>
+        <div class="text-center mb-3">
+            <button type="button" class="btn btn-filtro" id="btn-filtro" onclick="toggleFiltros()" aria-expanded="false" aria-controls="panel-filtros">
+                <i class="bi bi-sliders me-2"></i>Filtro
+                <span class="filtro-badge" id="filtro-badge" style="display: none;">0</span>
+                <i class="bi bi-chevron-down ms-2 filtro-chevron"></i>
+            </button>
+        </div>
+
+        <div id="panel-filtros" class="panel-filtros">
+            <div class="panel-filtros-inner">
+                <div class="row mb-3">
+                    <div class="col-12 d-flex justify-content-center gap-2 flex-wrap">
+                        <button class="btn btn-outline-dark active filter-btn" onclick="filtrarCategoria('Todos', this)">✨ Todos</button>
+                        <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Casa', this)">🏡 Casas</button>
+                        <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Departamento', this)">🏢 Departamentos</button>
+                        <button class="btn btn-outline-dark filter-btn" onclick="filtrarCategoria('Terreno', this)">🌱 Terrenos</button>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="filtros-ubicacion">
+                            <div class="filtros-header">
+                                <div class="filtros-icon">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="filtros-titulo">Encuentra tu propiedad</h5>
+                                    <p class="filtros-subtitulo">Filtra por categoría, región y comuna</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12 col-md-5">
+                                    <label for="filtro-region" class="form-label">
+                                        <i class="bi bi-map-fill me-1"></i>Región
+                                    </label>
+                                    <div class="filtro-select-wrapper">
+                                        <i class="bi bi-map filtro-select-icon"></i>
+                                        <select id="filtro-region" class="form-select" onchange="cambiarRegion(this.value)">
+                                            <option value="V Región de Valparaíso" selected>V Región de Valparaíso</option>
+                                            <option value="Todas las regiones">Todas las regiones</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-5">
+                                    <label for="filtro-ciudad" class="form-label">
+                                        <i class="bi bi-pin-map-fill me-1"></i>Ciudad / Comuna
+                                    </label>
+                                    <div class="filtro-select-wrapper">
+                                        <i class="bi bi-geo-alt filtro-select-icon"></i>
+                                        <select id="filtro-ciudad" class="form-select" onchange="cambiarCiudad(this.value)">
+                                            <option value="Todas las ciudades">Todas las ciudades</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-2">
+                                    <button type="button" class="btn btn-limpiar-filtros" onclick="limpiarFiltros()">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar filtros
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

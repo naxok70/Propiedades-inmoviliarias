@@ -7,7 +7,61 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 let propiedades = [];
 let todasLasPropiedades = [];
 let paginaActual = 1;
-const propiedadesPorPagina = 10;     
+const propiedadesPorPagina = 10;
+
+// Estado de los filtros
+let filtroCategoriaActual = 'Todos';
+let filtroRegionActual = 'V Región de Valparaíso';
+let filtroCiudadActual = 'Todas las ciudades';
+
+// Ciudades/comunas de la V Región y localidades que pertenecen a una comuna.
+// Se usa para deducir región y ciudad desde el texto libre de "ubicacion".
+const CIUDADES_V_REGION = [
+    'Valparaíso', 'Viña del Mar', 'Concón', 'Quilpué', 'Villa Alemana',
+    'Quillota', 'La Calera', 'La Cruz', 'Puchuncaví', 'Quintero',
+    'Casablanca', 'Limache', 'Olmué', 'Hijuelas', 'Nogales',
+    'San Antonio', 'Cartagena', 'El Quisco', 'El Tabo', 'Algarrobo',
+    'Santo Domingo', 'Los Andes', 'San Felipe', 'Santa María', 'Calle Larga',
+    'Rinconada', 'Llaillay', 'Llay-Llay', 'Panquehue', 'Catemu',
+    'Putaendo', 'Cabildo', 'La Ligua', 'Papudo', 'Zapallar',
+    'Petorca', 'San Esteban', 'Juan Fernández', 'Isla de Pascua'
+];
+
+// Localidades o sectores que se agrupan bajo su comuna correspondiente
+const ALIAS_CIUDADES = {
+    'Reñaca': 'Viña del Mar',
+    'Jardín del Mar': 'Viña del Mar',
+    'Maitencillo': 'Puchuncaví',
+    'Horcón': 'Puchuncaví',
+    'Ventanas': 'Puchuncaví',
+    'El Melón': 'Nogales',
+    'Placilla': 'Valparaíso',
+    'Las Cruces': 'El Tabo'
+};
+
+function normalizarTexto(texto) {
+    return String(texto || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+const CIUDADES_BUSQUEDA = [
+    ...CIUDADES_V_REGION.map(ciudad => ({ clave: normalizarTexto(ciudad), ciudad })),
+    ...Object.entries(ALIAS_CIUDADES).map(([alias, ciudad]) => ({ clave: normalizarTexto(alias), ciudad }))
+].sort((a, b) => b.clave.length - a.clave.length);
+
+function detectarUbicacion(ubicacion, titulo) {
+    const texto = normalizarTexto(`${ubicacion} ${titulo}`);
+    const coincidencia = CIUDADES_BUSQUEDA.find(item => texto.includes(item.clave));
+
+    return {
+        region: 'V Región de Valparaíso',
+        ciudad: coincidencia ? coincidencia.ciudad : 'Otras localidades'
+    };
+}
 
 function formatearPrecio(precio) {
     const num = parseInt(String(precio).replace(/\./g, '')) || 0;
@@ -34,7 +88,7 @@ function renderizarPropiedades() {
         contenedor.innerHTML = `
             <div class="col-12 text-center text-muted p-5">
                 <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
-                No hay propiedades disponibles en esta categoría por el momento.
+                No hay propiedades disponibles con los filtros seleccionados.
             </div>`;
         return;
     }
@@ -222,6 +276,8 @@ async function cargarPropiedades() {
                 urlsArray = p.foto_url.split(',').map(url => url.trim()).filter(url => url !== "");
             }
 
+            const { region, ciudad } = detectarUbicacion(p.ubicacion, p.nombre);
+
             return {
                 titulo: p.nombre,
                 categoria: p.categoria || "Casa", 
@@ -236,39 +292,154 @@ async function cargarPropiedades() {
                 gastosComunes: p.gastos_comunes || 0,
                 estacionamiento: p.estacionamiento || 0,
                 bodega: p.bodega || 0,
-                videoUrl: p.video_url || ""
+                videoUrl: p.video_url || "",
+                region: region,
+                ciudad: ciudad
             };
         });
 
-        propiedades = [...todasLasPropiedades];
-        renderizarPropiedades();
+        poblarFiltrosUbicacion();
+        aplicarFiltros();
 
     } catch (error) {
         console.error("Error al comunicar con la base de datos de Supabase:", error);
     }
 }
 
-function filtrarCategoria(catSeleccionada) {
+function filtrarCategoria(catSeleccionada, boton) {
     const botones = document.querySelectorAll('.filter-btn');
     botones.forEach(btn => btn.classList.remove('active'));
 
-    if (window.event && window.event.target) {
-        window.event.target.classList.add('active');
-    }
+    const botonActivo = boton || (window.event && window.event.target);
+    if (botonActivo) botonActivo.classList.add('active');
 
-    if (catSeleccionada === 'Todos') {
-        propiedades = [...todasLasPropiedades];
-    } else {
-        propiedades = todasLasPropiedades.filter(p => p.categoria === catSeleccionada);
-    }
+    filtroCategoriaActual = catSeleccionada;
+    aplicarFiltros();
+}
+
+// Aplica en conjunto los filtros de categoría, región y ciudad
+function aplicarFiltros() {
+    propiedades = todasLasPropiedades.filter(p => {
+        const cumpleCategoria = filtroCategoriaActual === 'Todos' || p.categoria === filtroCategoriaActual;
+        const cumpleRegion = filtroRegionActual === 'Todas las regiones' || p.region === filtroRegionActual;
+        const cumpleCiudad = filtroCiudadActual === 'Todas las ciudades' || p.ciudad === filtroCiudadActual;
+
+        return cumpleCategoria && cumpleRegion && cumpleCiudad;
+    });
 
     paginaActual = 1; // Resetear a página 1 al filtrar
     renderizarPropiedades();
+    actualizarEstadoFiltros();
+}
+
+// Muestra u oculta el panel de filtros de ubicación
+function toggleFiltros() {
+    const panel = document.getElementById('panel-filtros');
+    const boton = document.getElementById('btn-filtro');
+    if (!panel || !boton) return;
+
+    const abierto = panel.classList.toggle('abierto');
+    boton.classList.toggle('abierto', abierto);
+    boton.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+}
+
+// Actualiza el contador del botón "Filtro" según los filtros activos
+function actualizarEstadoFiltros() {
+    const badge = document.getElementById('filtro-badge');
+    if (!badge) return;
+
+    let activos = 0;
+    if (filtroCategoriaActual !== 'Todos') activos++;
+    if (filtroCiudadActual !== 'Todas las ciudades') activos++;
+    if (filtroRegionActual !== 'Todas las regiones' && filtroRegionActual !== 'V Región de Valparaíso') activos++;
+
+    badge.textContent = activos;
+    badge.style.display = activos > 0 ? 'inline-flex' : 'none';
+}
+
+// Llena el selector de regiones y deja seleccionada la V Región por defecto
+function poblarFiltrosUbicacion() {
+    const selectRegion = document.getElementById('filtro-region');
+    if (!selectRegion) return;
+
+    const regiones = [...new Set(todasLasPropiedades.map(p => p.region).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'es'));
+
+    if (!regiones.includes('V Región de Valparaíso')) {
+        regiones.unshift('V Región de Valparaíso');
+    }
+
+    if (filtroRegionActual !== 'Todas las regiones' && !regiones.includes(filtroRegionActual)) {
+        filtroRegionActual = 'V Región de Valparaíso';
+    }
+
+    selectRegion.innerHTML = `
+        <option value="Todas las regiones">Todas las regiones</option>
+        ${regiones.map(region => `<option value="${region}">${region}</option>`).join('')}
+    `;
+    selectRegion.value = filtroRegionActual;
+
+    actualizarCiudades();
+}
+
+// Actualiza las ciudades disponibles según la región seleccionada
+function actualizarCiudades() {
+    const selectCiudad = document.getElementById('filtro-ciudad');
+    if (!selectCiudad) return;
+
+    const propiedadesRegion = filtroRegionActual === 'Todas las regiones'
+        ? todasLasPropiedades
+        : todasLasPropiedades.filter(p => p.region === filtroRegionActual);
+
+    const ciudades = [...new Set(propiedadesRegion.map(p => p.ciudad).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'es'));
+
+    if (filtroCiudadActual !== 'Todas las ciudades' && !ciudades.includes(filtroCiudadActual)) {
+        filtroCiudadActual = 'Todas las ciudades';
+    }
+
+    selectCiudad.innerHTML = `
+        <option value="Todas las ciudades">Todas las ciudades</option>
+        ${ciudades.map(ciudad => `<option value="${ciudad}">${ciudad}</option>`).join('')}
+    `;
+    selectCiudad.value = filtroCiudadActual;
+}
+
+function cambiarRegion(region) {
+    filtroRegionActual = region;
+    filtroCiudadActual = 'Todas las ciudades';
+    actualizarCiudades();
+    aplicarFiltros();
+}
+
+function cambiarCiudad(ciudad) {
+    filtroCiudadActual = ciudad;
+    aplicarFiltros();
+}
+
+function limpiarFiltros() {
+    filtroCategoriaActual = 'Todos';
+    filtroRegionActual = 'V Región de Valparaíso';
+    filtroCiudadActual = 'Todas las ciudades';
+
+    document.querySelectorAll('.filter-btn').forEach((btn, index) => {
+        btn.classList.toggle('active', index === 0);
+    });
+
+    const selectRegion = document.getElementById('filtro-region');
+    if (selectRegion) selectRegion.value = filtroRegionActual;
+
+    actualizarCiudades();
+    aplicarFiltros();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarPropiedades();
     window.filtrarCategoria = filtrarCategoria;
+    window.toggleFiltros = toggleFiltros;
+    window.cambiarRegion = cambiarRegion;
+    window.cambiarCiudad = cambiarCiudad;
+    window.limpiarFiltros = limpiarFiltros;
     window.cambiarImagen = cambiarImagen;
     window.ampliarImagen = ampliarImagen;
     window.cambiarPagina = cambiarPagina;
