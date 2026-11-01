@@ -252,14 +252,15 @@ document.getElementById('propiedad-form').addEventListener('submit', async funct
     return;
   }
 
-  // Verificar uso del storage antes de subir imágenes
-  if (archivosFotos.length > 0) {
-    const usoStorage = await verificarUsoStorage();
-    if (usoStorage && usoStorage.estaCercaLimite) {
-      alert(`⚠️ CUIDADO: El uso de almacenamiento está cerca del límite (${usoStorage.porcentajeUso}% de ${usoStorage.limiteGB}GB).\n\nUso actual: ${usoStorage.usoGB}GB\n\nPor favor, elimina algunas propiedades con sus imágenes para liberar espacio o actualiza tu plan de Supabase.`);
-      return; // Bloquear la subida
-    }
-  }
+  // NOTA: La verificación del storage está desactivada porque el cálculo no es confiable.
+  // Para verificar el uso real, revisa el panel de Supabase: Project Settings > Database > Storage
+  // if (archivosFotos.length > 0) {
+  //   const usoStorage = await verificarUsoStorage();
+  //   if (usoStorage && usoStorage.estaCercaLimite) {
+  //     alert(`⚠️ CUIDADO: El uso de almacenamiento está cerca del límite (${usoStorage.porcentajeUso}% de ${usoStorage.limiteGB}GB).\n\nUso actual: ${usoStorage.usoGB}GB\n\nPor favor, elimina algunas propiedades con sus imágenes para liberar espacio o actualiza tu plan de Supabase.`);
+  //     return; // Bloquear la subida
+  //   }
+  // }
 
   btnGuardar.innerText = "⏳ Subiendo imágenes...";
   btnGuardar.disabled = true;
