@@ -383,8 +383,8 @@ async function verificarUsoStorage() {
       });
     }
     
-    // El plan tiene 500MB = 0.5GB = 536870912 bytes
-    const limiteGB = 0.5;
+    // El storage de archivos tiene 1GB = 1073741824 bytes
+    const limiteGB = 1;
     const limiteBytes = limiteGB * 1073741824;
     const usoGB = totalBytes / 1073741824;
     const porcentajeUso = (usoGB / limiteGB) * 100;
